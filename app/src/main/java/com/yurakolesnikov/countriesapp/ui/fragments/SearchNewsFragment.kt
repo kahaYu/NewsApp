@@ -8,16 +8,24 @@ import androidx.fragment.app.Fragment
 import com.yurakolesnikov.countriesapp.databinding.FragmentBreakingNewsBinding
 import com.yurakolesnikov.countriesapp.databinding.FragmentSavedNewsBinding
 import com.yurakolesnikov.countriesapp.databinding.FragmentSearchNewsBinding
+import com.yurakolesnikov.countriesapp.ui.NewsViewModel
+import com.yurakolesnikov.countriesapp.ui.mainActivity.NewsActivity
 import com.yurakolesnikov.countriesapp.utils.AutoClearedValue
 
 class SearchNewsFragment : Fragment() {
 
     private var binding by AutoClearedValue<FragmentSearchNewsBinding>(this)
 
+    lateinit var viewModel: NewsViewModel
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragmentSearchNewsBinding.inflate(inflater, container, false)
         return binding.root
+    }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        viewModel = (activity as NewsActivity).viewModel
     }
 
 }

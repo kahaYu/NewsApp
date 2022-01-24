@@ -15,7 +15,10 @@ import com.yurakolesnikov.countriesapp.models.Article
 
 class NewsAdapter : RecyclerView.Adapter<NewsAdapter.ArticleViewHolder>() {
 
-    inner class ArticleViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
+    inner class ArticleViewHolder(itemView: View, _binding: ItemArticlePreviewBinding) :
+        RecyclerView.ViewHolder(itemView) {
+        val binding = _binding
+    }
 
     private val differCallback = object : DiffUtil.ItemCallback<Article>() {
         override fun areItemsTheSame(oldItem: Article, newItem: Article): Boolean {
@@ -28,36 +31,27 @@ class NewsAdapter : RecyclerView.Adapter<NewsAdapter.ArticleViewHolder>() {
     }
 
     val differ = AsyncListDiffer(this, differCallback)
-    private lateinit var binding: ItemArticlePreviewBinding
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ArticleViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(
             R.layout.item_article_preview,
-            null, false
+            parent, false
         )
-        binding = ItemArticlePreviewBinding.bind(view)
-        return ArticleViewHolder(
-            LayoutInflater.from(parent.context).inflate(
-                R.layout.item_article_preview,
-                parent,
-                false
-            )
-        )
+        val binding = ItemArticlePreviewBinding.bind(view)
+        return ArticleViewHolder(view, binding)
     }
 
     override fun onBindViewHolder(holder: ArticleViewHolder, position: Int) {
         val article = differ.currentList[position]
-        holder.itemView.apply {
-            Glide.with(this).load(article.urlToImage).into(binding.ivArticleImage)
-            binding.apply {
-                tvSource.text = article.source.name
-                tvTitle.text = article.title
-                tvDescription.text = article.description
-                tvPublishedAt.text = article.publishedAt
-            }
-            setOnClickListener {
-                onItemClickListener?.let { it(article) }
-            }
+        Glide.with(holder.itemView).load(article.urlToImage).into(holder.binding.ivArticleImage)
+        holder.binding.apply {
+            tvSource.text = article.source.name
+            tvTitle.text = article.title
+            tvDescription.text = article.description
+            tvPublishedAt.text = article.publishedAt
+        }
+        holder.itemView.setOnClickListener {
+            onItemClickListener?.let { it(article) }
         }
     }
 
@@ -67,7 +61,7 @@ class NewsAdapter : RecyclerView.Adapter<NewsAdapter.ArticleViewHolder>() {
 
     private var onItemClickListener: ((Article) -> Unit)? = null
 
-    fun setOnItemClickListener (listener: (Article) -> Unit) {
+    fun setOnItemClickListener(listener: (Article) -> Unit) {
         onItemClickListener = listener
     }
 }
