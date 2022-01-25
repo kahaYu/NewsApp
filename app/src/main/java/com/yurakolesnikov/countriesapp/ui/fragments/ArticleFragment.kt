@@ -1,5 +1,6 @@
 package com.yurakolesnikov.countriesapp.ui.fragments
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -18,7 +19,10 @@ class ArticleFragment : Fragment() {
     private var binding by AutoClearedValue<FragmentArticleBinding>(this)
 
     lateinit var viewModel: NewsViewModel
-    val args: ArticleFragmentArgs by navArgs()
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragmentArticleBinding.inflate(inflater, container, false)
@@ -28,10 +32,9 @@ class ArticleFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel = (activity as NewsActivity).viewModel
-        val article = args.article
         binding.webView.apply {
             webViewClient = WebViewClient()
-            loadUrl(article.url)
+                loadUrl(viewModel.articleUrlForActicleFragment)
         }
     }
 

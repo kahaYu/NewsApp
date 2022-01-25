@@ -43,10 +43,8 @@ class SearchNewsFragment : Fragment() {
         setupRecyclerView()
 
         newsAdapter.setOnItemClickListener {
-            val bundle = Bundle().apply {
-                putSerializable("article", it)
-            }
-            findNavController().navigate(R.id.action_searchNewsFragment_to_articleFragment, bundle)
+            viewModel.articleUrlForActicleFragment = it.url
+            findNavController().navigate(R.id.action_searchNewsFragment_to_articleFragment)
         }
 
         var job: Job? = null
@@ -55,9 +53,9 @@ class SearchNewsFragment : Fragment() {
             job = MainScope().launch {
                 delay(SEARCH_NEWS_TIME_DELAY)
                 editable?.let {
-                    if (editable.toString().isNotEmpty()) {
+                    if (editable.toString().isNotEmpty() && editable.toString() != viewModel.lastSearchQuery) {
                         viewModel.searchNews(editable.toString())
-                    }
+                    } else if (editable.toString().isEmpty()) newsAdapter.differ.submitList(emptyList())
                 }
             }
         }
@@ -67,7 +65,8 @@ class SearchNewsFragment : Fragment() {
                 is Resource.Success -> {
                     hideProgressBar()
                     response.data?.let { newsResponse ->
-                        newsAdapter.differ.submitList(newsResponse.articles)
+                        if (binding.etSearch.text.isEmpty()) newsAdapter.differ.submitList(emptyList())
+                        else newsAdapter.differ.submitList(newsResponse.articles)
                     }
                 }
                 is Resource.Error -> {
@@ -77,10 +76,16 @@ class SearchNewsFragment : Fragment() {
                     }
                 }
                 is Resource.Loading -> {
+                    viewModel.lastSearchQuery = binding.etSearch.text.toString()
                     showProgressBar()
                 }
             }
         })
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel.lastSearchQuery = ""
     }
 
     private fun hideProgressBar() {

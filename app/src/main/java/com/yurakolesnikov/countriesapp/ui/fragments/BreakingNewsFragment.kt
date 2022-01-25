@@ -37,10 +37,8 @@ class BreakingNewsFragment : Fragment() {
         setupRecyclerView()
 
         newsAdapter.setOnItemClickListener {
-            val bundle = Bundle().apply {
-                putSerializable("article", it)
-            }
-            findNavController().navigate(R.id.action_breakingNewsFragment_to_articleFragment, bundle)
+            viewModel.articleUrlForActicleFragment = it.url
+            findNavController().navigate(R.id.action_breakingNewsFragment_to_articleFragment)
         }
 
         viewModel.breakingNews.observe(viewLifecycleOwner, Observer { response ->

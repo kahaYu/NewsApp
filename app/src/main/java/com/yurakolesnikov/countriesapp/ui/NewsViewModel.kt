@@ -19,6 +19,9 @@ class NewsViewModel(
     val searchNews: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
     var searchNewsPage = 1
 
+    var articleUrlForActicleFragment = ""
+    var lastSearchQuery = ""
+
     init {
         getBreakingNews("us")
     }
