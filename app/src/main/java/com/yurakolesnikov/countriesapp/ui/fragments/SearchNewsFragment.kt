@@ -41,9 +41,8 @@ class SearchNewsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         viewModel = (activity as NewsActivity).viewModel
         setupRecyclerView()
-
         newsAdapter.setOnItemClickListener {
-            viewModel.articleUrlForActicleFragment = it.url
+            viewModel.articleForArticleFragment = it
             findNavController().navigate(R.id.action_searchNewsFragment_to_articleFragment)
         }
 

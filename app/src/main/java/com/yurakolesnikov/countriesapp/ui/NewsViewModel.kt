@@ -3,6 +3,7 @@ package com.yurakolesnikov.countriesapp.ui
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.yurakolesnikov.countriesapp.models.Article
 import com.yurakolesnikov.countriesapp.models.NewsResponse
 import com.yurakolesnikov.countriesapp.repository.NewsRepository
 import com.yurakolesnikov.countriesapp.utils.Resource
@@ -19,7 +20,7 @@ class NewsViewModel(
     val searchNews: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
     var searchNewsPage = 1
 
-    var articleUrlForActicleFragment = ""
+    var articleForArticleFragment: Article? = null
     var lastSearchQuery = ""
 
     init {
@@ -55,5 +56,15 @@ class NewsViewModel(
         }
         return Resource.Error(response.message())
     }
+
+    fun saveArticle(article: Article) = viewModelScope.launch {
+        newsRepository.upsert(article)
+    }
+
+    fun deleteArticle(article: Article) = viewModelScope.launch {
+        newsRepository.deleteArticle(article)
+    }
+
+    fun getSavedNews() = newsRepository.getSavednews()
 
 }

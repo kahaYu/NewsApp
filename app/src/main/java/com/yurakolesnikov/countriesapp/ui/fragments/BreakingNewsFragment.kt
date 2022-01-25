@@ -37,7 +37,7 @@ class BreakingNewsFragment : Fragment() {
         setupRecyclerView()
 
         newsAdapter.setOnItemClickListener {
-            viewModel.articleUrlForActicleFragment = it.url
+            viewModel.articleForArticleFragment = it
             findNavController().navigate(R.id.action_breakingNewsFragment_to_articleFragment)
         }
 
