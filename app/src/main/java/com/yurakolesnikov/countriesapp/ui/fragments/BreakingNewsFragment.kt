@@ -79,12 +79,10 @@ class BreakingNewsFragment : Fragment() {
 
     var isLoading = false
     var isLastPage = false
-    var isScrolling = false
 
     val scrollListener = object : RecyclerView.OnScrollListener() {
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             super.onScrollStateChanged(recyclerView, newState)
-            if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) isScrolling = true
         }
 
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -100,9 +98,8 @@ class BreakingNewsFragment : Fragment() {
             val isNotAtBeginning = firstVisibleItemPosition >= 0
             val isTotalMoreThanVisible = totalItemCount >= QUERY_PAGE_SIZE
             val shouldPaginate = isNotLoadingAndNotLastPage && isAtLastItem && isNotAtBeginning &&
-                    isTotalMoreThanVisible && isScrolling
+                    isTotalMoreThanVisible
             if (shouldPaginate) viewModel.getBreakingNews("us")
-            isScrolling = false
         }
     }
 
