@@ -35,7 +35,7 @@ class ArticleFragment : Fragment() {
         viewModel = (activity as NewsActivity).viewModel
         binding.webView.apply {
             webViewClient = WebViewClient()
-            viewModel.articleForArticleFragment?.let { loadUrl(it.url) }
+            viewModel.articleForArticleFragment?.let { loadUrl(it.url ?: "") }
             }
 
         binding.fab.setOnClickListener {

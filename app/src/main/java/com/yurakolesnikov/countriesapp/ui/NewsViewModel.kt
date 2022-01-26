@@ -16,9 +16,11 @@ class NewsViewModel(
 
     val breakingNews: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
     var breakingNewsPage = 1
+    var breakingNewsResponse: NewsResponse? = null
 
     val searchNews: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
     var searchNewsPage = 1
+    var searchNewsResponse: NewsResponse? = null
 
     var articleForArticleFragment: Article? = null
     var lastSearchQuery = ""
@@ -39,19 +41,25 @@ class NewsViewModel(
         searchNews.postValue(handleSearchNewsResponse(response))
     }
 
-    private fun handleBreakingNewsResponse(response: Response<NewsResponse>) : Resource<NewsResponse> {
-        if(response.isSuccessful) {
+    private fun handleBreakingNewsResponse(response: Response<NewsResponse>): Resource<NewsResponse> {
+        if (response.isSuccessful) {
             response.body()?.let { resultResponse ->
-                return Resource.Success(resultResponse)
+                breakingNewsPage++
+                if (breakingNewsResponse == null) breakingNewsResponse = resultResponse
+                else breakingNewsResponse!!.articles.addAll(resultResponse.articles)
+                return Resource.Success(breakingNewsResponse!!)
             }
         }
         return Resource.Error(response.message())
     }
 
-    private fun handleSearchNewsResponse(response: Response<NewsResponse>) : Resource<NewsResponse> {
-        if(response.isSuccessful) {
+    private fun handleSearchNewsResponse(response: Response<NewsResponse>): Resource<NewsResponse> {
+        if (response.isSuccessful) {
             response.body()?.let { resultResponse ->
-                return Resource.Success(resultResponse)
+                searchNewsPage++
+                if (searchNewsResponse == null) searchNewsResponse = resultResponse
+                else searchNewsResponse!!.articles.addAll(resultResponse.articles)
+                return Resource.Success(searchNewsResponse!!)
             }
         }
         return Resource.Error(response.message())
