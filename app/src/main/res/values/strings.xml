@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">CountriesApp</string>
+    <string name="search">Search...</string>
+    <string name="breaking_news">Breaking News</string>
+    <string name="saved_news">Saved News</string>
+    <string name="search_news">Search News</string>
 </resources>
