@@ -1,2 +1,2 @@
-# CountriesApp
-REST, Retrofit, OkHtpp, Caching, Navigation Component, Flows, RecyclerView.
+# NewsApp
+Retrofit, OkHtpp, Caching, Navigation Component, Flows, RecyclerView.
