@@ -76,9 +76,11 @@ class SearchNewsFragment : Fragment() {
                 }
                 is Resource.Error -> {
                     hideProgressBar()
-                    if (viewModel.hasInternetConnection()) viewModel.searchNews(binding.etSearch.text.toString())
-                    else response.message?.let { message ->
+                    response.message?.let { message ->
                         Toast.makeText(activity, "An error occurred: $message", Toast.LENGTH_LONG).show()
+                        if (message != "Too many requests today" && viewModel.hasInternetConnection()) {
+                            viewModel.searchNews(binding.etSearch.text.toString())
+                        }
                     }
                 }
                 is Resource.Loading -> {

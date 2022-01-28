@@ -44,7 +44,7 @@ class BreakingNewsFragment : Fragment() {
         }
 
         viewModel.breakingNews.observe(viewLifecycleOwner, Observer { response ->
-            when(response) {
+            when (response) {
                 is Resource.Success -> {
                     hideProgressBar()
                     response.data?.let { newsResponse ->
@@ -55,9 +55,11 @@ class BreakingNewsFragment : Fragment() {
                 }
                 is Resource.Error -> {
                     hideProgressBar()
-                    if (viewModel.hasInternetConnection()) viewModel.getBreakingNews("us")
-                    else response.message?.let { message ->
+                    response.message?.let { message ->
                         Toast.makeText(activity, "An error occurred: $message", Toast.LENGTH_LONG).show()
+                        if (message != "Too many requests today" && viewModel.hasInternetConnection()) {
+                            viewModel.getBreakingNews("us")
+                        }
                     }
                 }
                 is Resource.Loading -> {
@@ -99,7 +101,9 @@ class BreakingNewsFragment : Fragment() {
             val isTotalMoreThanVisible = totalItemCount >= QUERY_PAGE_SIZE
             val shouldPaginate = isNotLoadingAndNotLastPage && isAtLastItem && isNotAtBeginning &&
                     isTotalMoreThanVisible
-            if (shouldPaginate) viewModel.getBreakingNews("us")
+            if (shouldPaginate) {
+                viewModel.getBreakingNews("us")
+            }
         }
     }
 

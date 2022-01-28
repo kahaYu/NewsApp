@@ -85,7 +85,9 @@ class NewsViewModel(
         try {
             if (hasInternetConnection()) {
                 val response = newsRepository.getBreakingNews(countryCode, breakingNewsPage)
-                breakingNews.postValue(handleBreakingNewsResponse(response))
+                if (response.code() == 429) {
+                    breakingNews.postValue(Resource.Error("Too many requests today"))
+                } else breakingNews.postValue(handleBreakingNewsResponse(response))
             } else breakingNews.postValue(Resource.Error("No internet connection"))
         } catch (t: Throwable) {
             when(t) {
@@ -100,7 +102,9 @@ class NewsViewModel(
         try {
             if (hasInternetConnection()) {
                 val response = newsRepository.searchNews(searchQuery, searchNewsPage)
-                searchNews.postValue(handleSearchNewsResponse(response))
+                if (response.code() == 429) {
+                    searchNews.postValue(Resource.Error("Too many requests today"))
+                } else searchNews.postValue(handleBreakingNewsResponse(response))
             } else searchNews.postValue(Resource.Error("No internet connection"))
         } catch (t: Throwable) {
             when(t) {
