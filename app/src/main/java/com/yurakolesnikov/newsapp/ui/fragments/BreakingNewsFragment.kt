@@ -51,6 +51,9 @@ class BreakingNewsFragment : Fragment() {
                         newsAdapter.differ.submitList(newsResponse.articles.toList())
                         val totalPages = newsResponse.totalResults / QUERY_PAGE_SIZE + 2
                         isLastPage = viewModel.breakingNewsPage == totalPages
+                        if(isLastPage) {
+                            binding.rvBreakingNews.setPadding(0, 0, 0, 56)
+                        }
                     }
                 }
                 is Resource.Error -> {
@@ -65,6 +68,7 @@ class BreakingNewsFragment : Fragment() {
                 is Resource.Loading -> {
                     showProgressBar()
                 }
+                is Resource.Nothing -> {}
             }
         })
     }
@@ -85,6 +89,13 @@ class BreakingNewsFragment : Fragment() {
     val scrollListener = object : RecyclerView.OnScrollListener() {
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             super.onScrollStateChanged(recyclerView, newState)
+
+            // If connection appear, all we need to refresh page is to swipe screen
+            if (!viewModel.previousInternetState && viewModel.hasInternetConnection()) {
+                viewModel.breakingNewsPage = 1
+                viewModel.getBreakingNews("us")
+                viewModel.previousInternetState = true
+            }
         }
 
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {

@@ -31,10 +31,16 @@ class ArticleFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel = (activity as NewsActivity).viewModel
+
+        // Разобраться тут. Вылазит ошибка при переходе на статью из savedFragment
+        //val nameOfPreviousFragment = childFragmentManager.getBackStackEntryAt(childFragmentManager.backStackEntryCount - 1).name
+        //if (nameOfPreviousFragment == "SavedNewsFragment") binding.fab.visibility = View.GONE
+
         binding.webView.apply {
             webViewClient = WebViewClient()
             viewModel.articleForArticleFragment?.let { loadUrl(it.url ?: "") }
             }
+
 
         binding.fab.setOnClickListener {
             viewModel.articleForArticleFragment?.let { viewModel.saveArticle(it) }

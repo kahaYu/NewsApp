@@ -58,7 +58,10 @@ class SearchNewsFragment : Fragment() {
                     viewModel.searchNewsResponse = null
                     if (editable.toString().isNotEmpty() && editable.toString() != viewModel.lastSearchQuery) {
                         viewModel.searchNews(editable.toString())
-                    } else if (editable.toString().isEmpty()) newsAdapter.differ.submitList(listOf<Article>())
+                    } else if (editable.toString().isEmpty()) {
+                        newsAdapter.differ.submitList(listOf<Article>())
+                        viewModel.lastSearchQuery = ""
+                    }
                 }
             }
         }
@@ -72,6 +75,9 @@ class SearchNewsFragment : Fragment() {
                         else newsAdapter.differ.submitList(newsResponse.articles.toList())
                         val totalPages = newsResponse.totalResults / Constants.QUERY_PAGE_SIZE + 2
                         isLastPage = viewModel.searchNewsPage == totalPages
+                        if(isLastPage) {
+                            binding.rvSearchNews.setPadding(0, 0, 0, 56)
+                        }
                     }
                 }
                 is Resource.Error -> {
@@ -87,6 +93,7 @@ class SearchNewsFragment : Fragment() {
                     viewModel.lastSearchQuery = binding.etSearch.text.toString()
                     showProgressBar()
                 }
+                is Resource.Nothing -> {}
             }
         })
     }
@@ -94,6 +101,7 @@ class SearchNewsFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         viewModel.lastSearchQuery = ""
+        viewModel.searchNews.value = Resource.Nothing()
     }
 
     private fun hideProgressBar() {

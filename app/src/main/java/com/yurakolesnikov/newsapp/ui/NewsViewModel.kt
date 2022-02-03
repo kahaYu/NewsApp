@@ -34,6 +34,8 @@ class NewsViewModel(
     var articleForArticleFragment: Article? = null
     var lastSearchQuery = ""
 
+    var previousInternetState = true
+
     init {
         getBreakingNews("us")
     }
@@ -88,9 +90,12 @@ class NewsViewModel(
                 if (response.code() == 429) {
                     breakingNews.postValue(Resource.Error("Too many requests today"))
                 } else breakingNews.postValue(handleBreakingNewsResponse(response))
-            } else breakingNews.postValue(Resource.Error("No internet connection"))
+            } else {
+                breakingNews.postValue(Resource.Error("No internet connection"))
+                previousInternetState = false
+            }
         } catch (t: Throwable) {
-            when(t) {
+            when (t) {
                 is IOException -> breakingNews.postValue(Resource.Error("Network failure"))
                 else -> breakingNews.postValue(Resource.Error("Conversion error"))
             }
@@ -104,10 +109,13 @@ class NewsViewModel(
                 val response = newsRepository.searchNews(searchQuery, searchNewsPage)
                 if (response.code() == 429) {
                     searchNews.postValue(Resource.Error("Too many requests today"))
-                } else searchNews.postValue(handleBreakingNewsResponse(response))
-            } else searchNews.postValue(Resource.Error("No internet connection"))
+                } else searchNews.postValue(handleSearchNewsResponse(response))
+            } else {
+                searchNews.postValue(Resource.Error("No internet connection"))
+                previousInternetState = false
+            }
         } catch (t: Throwable) {
-            when(t) {
+            when (t) {
                 is IOException -> searchNews.postValue(Resource.Error("Network failure"))
                 else -> searchNews.postValue(Resource.Error("Conversion error"))
             }
@@ -115,11 +123,13 @@ class NewsViewModel(
     }
 
     fun hasInternetConnection(): Boolean {
-        val connectivityManager = getApplication<NewsApplication>().getSystemService(Context.CONNECTIVITY_SERVICE)
-                as ConnectivityManager
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        val connectivityManager =
+            getApplication<NewsApplication>().getSystemService(Context.CONNECTIVITY_SERVICE)
+                    as ConnectivityManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             val activeNetwork = connectivityManager.activeNetwork ?: return false
-            val capabilities = connectivityManager.getNetworkCapabilities(activeNetwork) ?: return false
+            val capabilities =
+                connectivityManager.getNetworkCapabilities(activeNetwork) ?: return false
             return when {
                 capabilities.hasTransport(TRANSPORT_WIFI) -> true
                 capabilities.hasTransport(TRANSPORT_CELLULAR) -> true
@@ -128,7 +138,7 @@ class NewsViewModel(
             }
         } else {
             connectivityManager.activeNetworkInfo?.run {
-                return when(type) {
+                return when (type) {
                     TYPE_WIFI -> true
                     TYPE_MOBILE -> true
                     TYPE_ETHERNET -> true
