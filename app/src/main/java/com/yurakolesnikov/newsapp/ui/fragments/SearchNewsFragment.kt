@@ -73,27 +73,21 @@ class SearchNewsFragment : Fragment() {
                     response.data?.let { newsResponse ->
                         if (binding.etSearch.text.isEmpty()) newsAdapter.differ.submitList(listOf<Article>())
                         else newsAdapter.differ.submitList(newsResponse.articles.toList())
-                        val totalPages = newsResponse.totalResults / Constants.QUERY_PAGE_SIZE + 2
-                        isLastPage = viewModel.searchNewsPage == totalPages
-                        if(isLastPage) {
-                            binding.rvSearchNews.setPadding(0, 0, 0, 56)
-                        }
                     }
                 }
                 is Resource.Error -> {
                     hideProgressBar()
                     response.message?.let { message ->
                         Toast.makeText(activity, "An error occurred: $message", Toast.LENGTH_LONG).show()
-                        if (message != "Too many requests today" && viewModel.hasInternetConnection()) {
-                            viewModel.searchNews(binding.etSearch.text.toString())
-                        }
+                        //if (message != "Too many requests today" && viewModel.hasInternetConnection()) {
+                        //    viewModel.searchNews(binding.etSearch.text.toString())
+                        //}
                     }
                 }
                 is Resource.Loading -> {
                     viewModel.lastSearchQuery = binding.etSearch.text.toString()
                     showProgressBar()
                 }
-                is Resource.Nothing -> {}
             }
         })
     }
@@ -101,23 +95,19 @@ class SearchNewsFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         viewModel.lastSearchQuery = ""
-        viewModel.searchNews.value = Resource.Nothing()
     }
 
     private fun hideProgressBar() {
         binding.paginationProgressBar.visibility = View.INVISIBLE
-        isLoading = false
     }
 
     private fun showProgressBar() {
         binding.paginationProgressBar.visibility = View.VISIBLE
-        isLoading = true
     }
 
-    var isLoading = false
-    var isLastPage = false
+    var totalResults = 0.toDouble()
 
-    val scrollListener = object : RecyclerView.OnScrollListener() {
+    private val scrollListener = object : RecyclerView.OnScrollListener() {
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             super.onScrollStateChanged(recyclerView, newState)
         }
@@ -126,17 +116,20 @@ class SearchNewsFragment : Fragment() {
             super.onScrolled(recyclerView, dx, dy)
 
             val layoutManager = recyclerView.layoutManager as LinearLayoutManager
-            val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
-            val visibleItemCount = layoutManager.childCount
-            val totalItemCount = layoutManager.itemCount
+            val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
+            val totalItemCountInAdapter = layoutManager.itemCount
 
-            val isNotLoadingAndNotLastPage = !isLoading && !isLastPage
-            val isAtLastItem = firstVisibleItemPosition + visibleItemCount >= totalItemCount
-            val isNotAtBeginning = firstVisibleItemPosition >= 0
-            val isTotalMoreThanVisible = totalItemCount >= Constants.QUERY_PAGE_SIZE
-            val shouldPaginate = isNotLoadingAndNotLastPage && isAtLastItem && isNotAtBeginning &&
-                    isTotalMoreThanVisible
+            val isAtLastItem = (lastVisibleItemPosition + 1) == totalItemCountInAdapter
+            val isTotalMoreThanVisible = totalResults > totalItemCountInAdapter
+
+            val shouldPaginate = isAtLastItem && isTotalMoreThanVisible
+            val shouldSetPadding = (lastVisibleItemPosition + 1) == totalResults.toInt()
+
             if (shouldPaginate) viewModel.searchNews(binding.etSearch.text.toString())
+
+            if (shouldSetPadding) {
+                binding.rvSearchNews.setPadding(0, 0, 0, 56)
+            } else binding.rvSearchNews.setPadding(0, 0, 0, 0)
         }
     }
 

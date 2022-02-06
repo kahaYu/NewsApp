@@ -48,30 +48,6 @@ class NewsViewModel(
         safeSearchNewsCall(searchQuery)
     }
 
-    private fun handleBreakingNewsResponse(response: Response<NewsResponse>): Resource<NewsResponse> {
-        if (response.isSuccessful) {
-            response.body()?.let { resultResponse ->
-                breakingNewsPage++
-                if (breakingNewsResponse == null) breakingNewsResponse = resultResponse
-                else breakingNewsResponse!!.articles.addAll(resultResponse.articles)
-                return Resource.Success(breakingNewsResponse!!)
-            }
-        }
-        return Resource.Error(response.message())
-    }
-
-    private fun handleSearchNewsResponse(response: Response<NewsResponse>): Resource<NewsResponse> {
-        if (response.isSuccessful) {
-            response.body()?.let { resultResponse ->
-                searchNewsPage++
-                if (searchNewsResponse == null) searchNewsResponse = resultResponse
-                else searchNewsResponse!!.articles.addAll(resultResponse.articles)
-                return Resource.Success(searchNewsResponse!!)
-            }
-        }
-        return Resource.Error(response.message())
-    }
-
     fun saveArticle(article: Article) = viewModelScope.launch {
         newsRepository.upsert(article)
     }
@@ -80,19 +56,22 @@ class NewsViewModel(
         newsRepository.deleteArticle(article)
     }
 
-    fun getSavedNews() = newsRepository.getSavednews()
+    fun getSavedNews() = newsRepository.getSavedNews()
 
     private suspend fun safeBreakingNewsCall(countryCode: String) {
         breakingNews.postValue(Resource.Loading())
         try {
             if (hasInternetConnection()) {
                 val response = newsRepository.getBreakingNews(countryCode, breakingNewsPage)
-                if (response.code() == 429) {
-                    breakingNews.postValue(Resource.Error("Too many requests today"))
-                } else breakingNews.postValue(handleBreakingNewsResponse(response))
+                when {
+                    response.isSuccessful ->
+                        breakingNews.postValue(handleBreakingNewsResponse(response))
+                    !response.isSuccessful ->
+                        breakingNews.postValue(Resource.Error(response.message()))
+                }
             } else {
                 breakingNews.postValue(Resource.Error("No internet connection"))
-                previousInternetState = false
+                //previousInternetState = false
             }
         } catch (t: Throwable) {
             when (t) {
@@ -102,17 +81,29 @@ class NewsViewModel(
         }
     }
 
+    private fun handleBreakingNewsResponse(response: Response<NewsResponse>): Resource<NewsResponse> {
+        breakingNewsPage++
+        if (breakingNewsResponse == null) breakingNewsResponse = response.body()
+        else breakingNewsResponse!!.articles.addAll(
+            (response.body()?.articles) ?: listOf<Article>()
+        )
+        return Resource.Success(breakingNewsResponse!!)
+    }
+
     private suspend fun safeSearchNewsCall(searchQuery: String) {
         searchNews.postValue(Resource.Loading())
         try {
             if (hasInternetConnection()) {
                 val response = newsRepository.searchNews(searchQuery, searchNewsPage)
-                if (response.code() == 429) {
-                    searchNews.postValue(Resource.Error("Too many requests today"))
-                } else searchNews.postValue(handleSearchNewsResponse(response))
+                when {
+                    response.isSuccessful ->
+                        searchNews.postValue(handleSearchNewsResponse(response))
+                    !response.isSuccessful ->
+                        searchNews.postValue(Resource.Error(response.message()))
+                }
             } else {
                 searchNews.postValue(Resource.Error("No internet connection"))
-                previousInternetState = false
+                //previousInternetState = false
             }
         } catch (t: Throwable) {
             when (t) {
@@ -122,7 +113,16 @@ class NewsViewModel(
         }
     }
 
-    fun hasInternetConnection(): Boolean {
+    private fun handleSearchNewsResponse(response: Response<NewsResponse>): Resource<NewsResponse> {
+        searchNewsPage++
+        if (searchNewsResponse == null) searchNewsResponse = response.body()
+        else searchNewsResponse!!.articles.addAll(
+            (response.body()?.articles) ?: listOf<Article>()
+        )
+        return Resource.Success(searchNewsResponse!!)
+    }
+
+    private fun hasInternetConnection(): Boolean {
         val connectivityManager =
             getApplication<NewsApplication>().getSystemService(Context.CONNECTIVITY_SERVICE)
                     as ConnectivityManager
