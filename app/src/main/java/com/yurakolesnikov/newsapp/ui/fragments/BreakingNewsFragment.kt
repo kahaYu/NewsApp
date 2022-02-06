@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.yurakolesnikov.newsapp.R
 import com.yurakolesnikov.newsapp.adapters.NewsAdapter
 import com.yurakolesnikov.newsapp.databinding.FragmentBreakingNewsBinding
+import com.yurakolesnikov.newsapp.models.NewsResponse
 import com.yurakolesnikov.newsapp.ui.NewsViewModel
 import com.yurakolesnikov.newsapp.ui.NewsActivity
 import com.yurakolesnikov.newsapp.utils.AutoClearedValue
@@ -28,7 +30,7 @@ class BreakingNewsFragment : Fragment() {
     lateinit var viewModel: NewsViewModel
     lateinit var newsAdapter: NewsAdapter
 
-    var totalResults: Int? = null
+    var isLoading = false
 
     val TAG = "BreakingNewsFragment"
 
@@ -52,13 +54,15 @@ class BreakingNewsFragment : Fragment() {
             findNavController().navigate(R.id.action_breakingNewsFragment_to_articleFragment)
         }
 
+        newsAdapter.differ.submitList(viewModel.breakingNewsResponse?.articles)
+
         viewModel.breakingNews.observe(viewLifecycleOwner, Observer { response ->
             when (response) {
                 is Resource.Success -> {
                     hideProgressBar()
                     response.data?.let { newsResponse ->
                         newsAdapter.differ.submitList(newsResponse.articles.toList())
-                        totalResults = newsResponse.totalResults
+                        viewModel.totalResults = newsResponse.totalResults
                     }
                 }
                 is Resource.Error -> {
@@ -66,9 +70,6 @@ class BreakingNewsFragment : Fragment() {
                     response.message?.let { message ->
                         Toast.makeText(activity, "An error occurred: $message", Toast.LENGTH_LONG)
                             .show()
-                        //if (message != "Too many requests today" && viewModel.hasInternetConnection()) {
-                        //    viewModel.getBreakingNews("us")
-                        //}
                     }
                 }
                 is Resource.Loading -> {
@@ -88,29 +89,25 @@ class BreakingNewsFragment : Fragment() {
         isLoading = true
     }
 
-    var isLoading = false
-
     private val scrollListener = object : RecyclerView.OnScrollListener() {
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             super.onScrollStateChanged(recyclerView, newState)
 
             // If connection appear, all we need to refresh page is to swipe screen
-            //if (!viewModel.previousInternetState && viewModel.hasInternetConnection()) {
-            //    viewModel.breakingNewsPage = 1
-            //    viewModel.getBreakingNews("us")
-            //    viewModel.previousInternetState = true
-            //}
+            if (!viewModel.previousInternetState && viewModel.hasInternetConnection()) {
+                viewModel.getBreakingNews("us")
+            }
         }
 
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
 
             val layoutManager = recyclerView.layoutManager as LinearLayoutManager
-            val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
+            val lastVisibleItemPosition = layoutManager.findLastCompletelyVisibleItemPosition()
             val totalItemCountInAdapter = layoutManager.itemCount
 
             val isAtLastItem = (lastVisibleItemPosition + 1) == totalItemCountInAdapter
-            val isTotalMoreThanVisible = totalResults ?: 0 > totalItemCountInAdapter
+            val isTotalMoreThanVisible = viewModel.totalResults ?: 0 > totalItemCountInAdapter
 
             val shouldPaginate = isAtLastItem && isTotalMoreThanVisible && !isLoading
 
@@ -127,6 +124,11 @@ class BreakingNewsFragment : Fragment() {
             layoutManager = LinearLayoutManager(activity)
             addOnScrollListener(this@BreakingNewsFragment.scrollListener)
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel.breakingNews  = MutableLiveData()
     }
 
 }

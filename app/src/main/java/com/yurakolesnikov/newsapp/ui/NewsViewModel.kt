@@ -23,7 +23,7 @@ class NewsViewModel(
     app: Application
 ) : AndroidViewModel(app) {
 
-    val breakingNews: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
+    var breakingNews: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
     var breakingNewsPage = 1
     var breakingNewsResponse: NewsResponse? = null
 
@@ -33,6 +33,8 @@ class NewsViewModel(
 
     var articleForArticleFragment: Article? = null
     var lastSearchQuery = ""
+
+    var totalResults = 0
 
     var previousInternetState = true
 
@@ -61,22 +63,24 @@ class NewsViewModel(
     private suspend fun safeBreakingNewsCall(countryCode: String) {
         breakingNews.postValue(Resource.Loading())
         try {
+            previousInternetState = hasInternetConnection()
             if (hasInternetConnection()) {
                 val response = newsRepository.getBreakingNews(countryCode, breakingNewsPage)
                 when {
                     response.isSuccessful ->
                         breakingNews.postValue(handleBreakingNewsResponse(response))
+                    response.code() == 429 ->
+                        breakingNews.postValue(Resource.Error("too many requests"))
                     !response.isSuccessful ->
                         breakingNews.postValue(Resource.Error(response.message()))
                 }
             } else {
-                breakingNews.postValue(Resource.Error("No internet connection"))
-                //previousInternetState = false
+                breakingNews.postValue(Resource.Error("no internet connection"))
             }
         } catch (t: Throwable) {
             when (t) {
-                is IOException -> breakingNews.postValue(Resource.Error("Network failure"))
-                else -> breakingNews.postValue(Resource.Error("Conversion error"))
+                is IOException -> breakingNews.postValue(Resource.Error("network failure"))
+                else -> breakingNews.postValue(Resource.Error("conversion error"))
             }
         }
     }
@@ -93,22 +97,24 @@ class NewsViewModel(
     private suspend fun safeSearchNewsCall(searchQuery: String) {
         searchNews.postValue(Resource.Loading())
         try {
+            previousInternetState = hasInternetConnection()
             if (hasInternetConnection()) {
                 val response = newsRepository.searchNews(searchQuery, searchNewsPage)
                 when {
                     response.isSuccessful ->
                         searchNews.postValue(handleSearchNewsResponse(response))
+                    response.code() == 429 ->
+                        searchNews.postValue(Resource.Error("too many requests"))
                     !response.isSuccessful ->
                         searchNews.postValue(Resource.Error(response.message()))
                 }
             } else {
-                searchNews.postValue(Resource.Error("No internet connection"))
-                //previousInternetState = false
+                searchNews.postValue(Resource.Error("no internet connection"))
             }
         } catch (t: Throwable) {
             when (t) {
-                is IOException -> searchNews.postValue(Resource.Error("Network failure"))
-                else -> searchNews.postValue(Resource.Error("Conversion error"))
+                is IOException -> searchNews.postValue(Resource.Error("network failure"))
+                else -> searchNews.postValue(Resource.Error("conversion error"))
             }
         }
     }
@@ -122,7 +128,7 @@ class NewsViewModel(
         return Resource.Success(searchNewsResponse!!)
     }
 
-    private fun hasInternetConnection(): Boolean {
+    fun hasInternetConnection(): Boolean {
         val connectivityManager =
             getApplication<NewsApplication>().getSystemService(Context.CONNECTIVITY_SERVICE)
                     as ConnectivityManager
