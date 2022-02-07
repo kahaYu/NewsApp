@@ -14,14 +14,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.yurakolesnikov.newsapp.R
 import com.yurakolesnikov.newsapp.adapters.NewsAdapter
 import com.yurakolesnikov.newsapp.databinding.FragmentBreakingNewsBinding
-import com.yurakolesnikov.newsapp.models.NewsResponse
 import com.yurakolesnikov.newsapp.ui.NewsViewModel
 import com.yurakolesnikov.newsapp.ui.NewsActivity
 import com.yurakolesnikov.newsapp.utils.AutoClearedValue
-import com.yurakolesnikov.newsapp.utils.Constants.Companion.QUERY_PAGE_SIZE
 import com.yurakolesnikov.newsapp.utils.Resource
-import com.yurakolesnikov.newsapp.utils.roundToNextInt
-import java.math.RoundingMode
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import java.util.*
 
 class BreakingNewsFragment : Fragment() {
 
@@ -31,6 +32,8 @@ class BreakingNewsFragment : Fragment() {
     lateinit var newsAdapter: NewsAdapter
 
     var isLoading = false
+
+
 
     val TAG = "BreakingNewsFragment"
 
@@ -55,6 +58,7 @@ class BreakingNewsFragment : Fragment() {
         }
 
         newsAdapter.differ.submitList(viewModel.breakingNewsResponse?.articles)
+        if (viewModel.breakingNewsResponse == null) viewModel.getBreakingNews("us")
 
         viewModel.breakingNews.observe(viewLifecycleOwner, Observer { response ->
             when (response) {
@@ -68,8 +72,7 @@ class BreakingNewsFragment : Fragment() {
                 is Resource.Error -> {
                     hideProgressBar()
                     response.message?.let { message ->
-                        Toast.makeText(activity, "An error occurred: $message", Toast.LENGTH_LONG)
-                            .show()
+                        viewModel.showSafeToast(requireActivity(), message)
                     }
                 }
                 is Resource.Loading -> {
@@ -94,9 +97,9 @@ class BreakingNewsFragment : Fragment() {
             super.onScrollStateChanged(recyclerView, newState)
 
             // If connection appear, all we need to refresh page is to swipe screen
-            if (!viewModel.previousInternetState && viewModel.hasInternetConnection()) {
+            if (!viewModel.previousInternetStateBreakingNews && viewModel.hasInternetConnection()) {
                 viewModel.getBreakingNews("us")
-            }
+            } else viewModel.breakingNews.postValue(Resource.Error("no internet connection"))
         }
 
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -106,7 +109,7 @@ class BreakingNewsFragment : Fragment() {
             val lastVisibleItemPosition = layoutManager.findLastCompletelyVisibleItemPosition()
             val totalItemCountInAdapter = layoutManager.itemCount
 
-            val isAtLastItem = (lastVisibleItemPosition + 1) == totalItemCountInAdapter
+            val isAtLastItem = (lastVisibleItemPosition + 2) == totalItemCountInAdapter
             val isTotalMoreThanVisible = viewModel.totalResults ?: 0 > totalItemCountInAdapter
 
             val shouldPaginate = isAtLastItem && isTotalMoreThanVisible && !isLoading
@@ -128,7 +131,6 @@ class BreakingNewsFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        viewModel.breakingNews  = MutableLiveData()
+        viewModel.breakingNews = MutableLiveData()
     }
-
 }

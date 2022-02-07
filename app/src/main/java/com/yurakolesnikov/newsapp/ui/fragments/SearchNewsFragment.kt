@@ -1,12 +1,14 @@
 package com.yurakolesnikov.newsapp.ui.fragments
 
 import android.os.Bundle
+import android.text.Editable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,7 +20,6 @@ import com.yurakolesnikov.newsapp.models.Article
 import com.yurakolesnikov.newsapp.ui.NewsViewModel
 import com.yurakolesnikov.newsapp.ui.NewsActivity
 import com.yurakolesnikov.newsapp.utils.AutoClearedValue
-import com.yurakolesnikov.newsapp.utils.Constants
 import com.yurakolesnikov.newsapp.utils.Constants.Companion.SEARCH_NEWS_TIME_DELAY
 import com.yurakolesnikov.newsapp.utils.Resource
 import kotlinx.coroutines.Job
@@ -32,7 +33,10 @@ class SearchNewsFragment : Fragment() {
 
     lateinit var viewModel: NewsViewModel
     lateinit var newsAdapter: NewsAdapter
-    val TAG = "SearchNewsFragment"
+
+    var isLoading = false
+
+    var job: Job? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = FragmentSearchNewsBinding.inflate(inflater, container, false)
@@ -42,13 +46,17 @@ class SearchNewsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel = (activity as NewsActivity).viewModel
+
         setupRecyclerView()
+
         newsAdapter.setOnItemClickListener {
             viewModel.articleForArticleFragment = it
             findNavController().navigate(R.id.action_searchNewsFragment_to_articleFragment)
         }
 
-        var job: Job? = null
+        binding.etSearch.setText(viewModel.lastSearchQuery)
+        newsAdapter.differ.submitList(viewModel.searchNewsResponse?.articles)
+
         binding.etSearch.addTextChangedListener { editable ->
             job?.cancel()
             job = MainScope().launch {
@@ -73,15 +81,13 @@ class SearchNewsFragment : Fragment() {
                     response.data?.let { newsResponse ->
                         if (binding.etSearch.text.isEmpty()) newsAdapter.differ.submitList(listOf<Article>())
                         else newsAdapter.differ.submitList(newsResponse.articles.toList())
+                        viewModel.totalResults = newsResponse.totalResults
                     }
                 }
                 is Resource.Error -> {
                     hideProgressBar()
                     response.message?.let { message ->
-                        Toast.makeText(activity, "An error occurred: $message", Toast.LENGTH_LONG).show()
-                        //if (message != "Too many requests today" && viewModel.hasInternetConnection()) {
-                        //    viewModel.searchNews(binding.etSearch.text.toString())
-                        //}
+                        viewModel.showSafeToast(requireActivity(), message)
                     }
                 }
                 is Resource.Loading -> {
@@ -94,42 +100,43 @@ class SearchNewsFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        viewModel.lastSearchQuery = ""
+        //viewModel.searchNews  = MutableLiveData()
+        job?.cancel()
     }
 
     private fun hideProgressBar() {
         binding.paginationProgressBar.visibility = View.INVISIBLE
+        isLoading = false
     }
 
     private fun showProgressBar() {
         binding.paginationProgressBar.visibility = View.VISIBLE
+        isLoading = true
     }
-
-    var totalResults = 0.toDouble()
 
     private val scrollListener = object : RecyclerView.OnScrollListener() {
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             super.onScrollStateChanged(recyclerView, newState)
+
+            if (!viewModel.previousInternetStateSearchNews && viewModel.hasInternetConnection()) {
+                viewModel.searchNews(binding.etSearch.text.toString())
+            }
         }
 
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
+            if (dy != 0) {
+                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                val lastVisibleItemPosition = layoutManager.findLastCompletelyVisibleItemPosition()
+                val totalItemCountInAdapter = layoutManager.itemCount
 
-            val layoutManager = recyclerView.layoutManager as LinearLayoutManager
-            val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
-            val totalItemCountInAdapter = layoutManager.itemCount
+                val isAtLastItem = (lastVisibleItemPosition + 2) >= totalItemCountInAdapter
+                val isTotalMoreThanVisible = viewModel.totalResults ?: 0 > totalItemCountInAdapter
 
-            val isAtLastItem = (lastVisibleItemPosition + 1) == totalItemCountInAdapter
-            val isTotalMoreThanVisible = totalResults > totalItemCountInAdapter
+                val shouldPaginate = isAtLastItem && isTotalMoreThanVisible && !isLoading
 
-            val shouldPaginate = isAtLastItem && isTotalMoreThanVisible
-            val shouldSetPadding = (lastVisibleItemPosition + 1) == totalResults.toInt()
-
-            if (shouldPaginate) viewModel.searchNews(binding.etSearch.text.toString())
-
-            if (shouldSetPadding) {
-                binding.rvSearchNews.setPadding(0, 0, 0, 56)
-            } else binding.rvSearchNews.setPadding(0, 0, 0, 0)
+                if (shouldPaginate) viewModel.searchNews(binding.etSearch.text.toString())
+            }
         }
     }
 

@@ -1,11 +1,13 @@
 package com.yurakolesnikov.newsapp.ui
 
+import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.ConnectivityManager.*
 import android.net.NetworkCapabilities.*
 import android.os.Build
+import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -17,6 +19,7 @@ import com.yurakolesnikov.newsapp.utils.Resource
 import kotlinx.coroutines.launch
 import retrofit2.Response
 import java.io.IOException
+import java.util.*
 
 class NewsViewModel(
     val newsRepository: NewsRepository,
@@ -27,7 +30,7 @@ class NewsViewModel(
     var breakingNewsPage = 1
     var breakingNewsResponse: NewsResponse? = null
 
-    val searchNews: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
+    var searchNews: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
     var searchNewsPage = 1
     var searchNewsResponse: NewsResponse? = null
 
@@ -36,7 +39,10 @@ class NewsViewModel(
 
     var totalResults = 0
 
-    var previousInternetState = true
+    var previousInternetStateBreakingNews = true
+    var previousInternetStateSearchNews = true
+
+    var toastShowTime = 0L
 
     init {
         getBreakingNews("us")
@@ -63,7 +69,7 @@ class NewsViewModel(
     private suspend fun safeBreakingNewsCall(countryCode: String) {
         breakingNews.postValue(Resource.Loading())
         try {
-            previousInternetState = hasInternetConnection()
+            previousInternetStateBreakingNews = hasInternetConnection()
             if (hasInternetConnection()) {
                 val response = newsRepository.getBreakingNews(countryCode, breakingNewsPage)
                 when {
@@ -97,7 +103,7 @@ class NewsViewModel(
     private suspend fun safeSearchNewsCall(searchQuery: String) {
         searchNews.postValue(Resource.Loading())
         try {
-            previousInternetState = hasInternetConnection()
+            previousInternetStateSearchNews = hasInternetConnection()
             if (hasInternetConnection()) {
                 val response = newsRepository.searchNews(searchQuery, searchNewsPage)
                 when {
@@ -153,5 +159,12 @@ class NewsViewModel(
             }
         }
         return false
+    }
+
+    fun showSafeToast(activity: Activity, text: String) {
+        if (Calendar.getInstance().timeInMillis >= toastShowTime + 4000L) {
+            Toast.makeText(activity, "An error occurred: $text", Toast.LENGTH_LONG).show()
+            toastShowTime = Calendar.getInstance().timeInMillis
+        }
     }
 }
