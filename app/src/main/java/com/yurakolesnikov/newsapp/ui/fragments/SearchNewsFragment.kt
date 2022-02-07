@@ -20,6 +20,7 @@ import com.yurakolesnikov.newsapp.models.Article
 import com.yurakolesnikov.newsapp.ui.NewsViewModel
 import com.yurakolesnikov.newsapp.ui.NewsActivity
 import com.yurakolesnikov.newsapp.utils.AutoClearedValue
+import com.yurakolesnikov.newsapp.utils.Constants
 import com.yurakolesnikov.newsapp.utils.Constants.Companion.SEARCH_NEWS_TIME_DELAY
 import com.yurakolesnikov.newsapp.utils.Resource
 import kotlinx.coroutines.Job
@@ -38,7 +39,11 @@ class SearchNewsFragment : Fragment() {
 
     var job: Job? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         binding = FragmentSearchNewsBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -64,7 +69,9 @@ class SearchNewsFragment : Fragment() {
                 editable?.let {
                     viewModel.searchNewsPage = 1
                     viewModel.searchNewsResponse = null
-                    if (editable.toString().isNotEmpty() && editable.toString() != viewModel.lastSearchQuery) {
+                    if (editable.toString()
+                            .isNotEmpty() && editable.toString() != viewModel.lastSearchQuery
+                    ) {
                         viewModel.searchNews(editable.toString())
                     } else if (editable.toString().isEmpty()) {
                         newsAdapter.differ.submitList(listOf<Article>())
@@ -79,9 +86,15 @@ class SearchNewsFragment : Fragment() {
                 is Resource.Success -> {
                     hideProgressBar()
                     response.data?.let { newsResponse ->
-                        if (binding.etSearch.text.isEmpty()) newsAdapter.differ.submitList(listOf<Article>())
-                        else newsAdapter.differ.submitList(newsResponse.articles.toList())
-                        viewModel.totalResults = newsResponse.totalResults
+                        if (binding.etSearch.text.isNotEmpty()) {
+                            newsAdapter.differ.submitList(newsResponse.articles.toList())
+                            val rangeStart =
+                                (viewModel.searchNewsPage - 2) * Constants.QUERY_PAGE_SIZE + 1
+                            val itemCount = newsResponse.articles.size - rangeStart + 1
+                            newsAdapter.notifyItemRangeInserted(rangeStart, itemCount)
+                            viewModel.totalResults = newsResponse.totalResults
+                            viewModel.totalResults = newsResponse.totalResults
+                        } else newsAdapter.differ.submitList(listOf<Article>())
                     }
                 }
                 is Resource.Error -> {
@@ -100,7 +113,7 @@ class SearchNewsFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        //viewModel.searchNews  = MutableLiveData()
+        viewModel.searchNews = MutableLiveData()
         job?.cancel()
     }
 
@@ -118,7 +131,9 @@ class SearchNewsFragment : Fragment() {
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             super.onScrollStateChanged(recyclerView, newState)
 
-            if (!viewModel.previousInternetStateSearchNews && viewModel.hasInternetConnection()) {
+            if (viewModel.searchNewsResponse == null
+                &&!viewModel.previousInternetStateSearchNews
+                && viewModel.hasInternetConnection()) {
                 viewModel.searchNews(binding.etSearch.text.toString())
             }
         }
@@ -127,15 +142,17 @@ class SearchNewsFragment : Fragment() {
             super.onScrolled(recyclerView, dx, dy)
             if (dy != 0) {
                 val layoutManager = recyclerView.layoutManager as LinearLayoutManager
-                val lastVisibleItemPosition = layoutManager.findLastCompletelyVisibleItemPosition()
+                val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
                 val totalItemCountInAdapter = layoutManager.itemCount
 
-                val isAtLastItem = (lastVisibleItemPosition + 2) >= totalItemCountInAdapter
+                val isAtLastItem = (lastVisibleItemPosition + 1) >= totalItemCountInAdapter
                 val isTotalMoreThanVisible = viewModel.totalResults ?: 0 > totalItemCountInAdapter
 
                 val shouldPaginate = isAtLastItem && isTotalMoreThanVisible && !isLoading
 
-                if (shouldPaginate) viewModel.searchNews(binding.etSearch.text.toString())
+                if (shouldPaginate) {
+                    viewModel.searchNews(binding.etSearch.text.toString())
+                }
             }
         }
     }
