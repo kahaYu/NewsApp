@@ -5,5 +5,6 @@
     <color name="red">#FF0000</color>
     <color name="transparent">#00FFFFFF</color>
     <color name="grey_transparent">#33838383</color>
+    <color name="grey_light">#ededed</color>
     <color name="main_transparent">#1A31C1FF</color>
 </resources>

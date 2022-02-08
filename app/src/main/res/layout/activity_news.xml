@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ui.NewsActivity">
+    tools:context=".ui.NewsActivity"
+    android:background="@drawable/opt1">
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/newsNavHostFragment"

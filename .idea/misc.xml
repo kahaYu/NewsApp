@@ -3,10 +3,11 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/ASProjects/NewsApp/app/src/main/res/drawable/bd_main_bitmap.xml" value="0.196" />
         <entry key="..\:/ASProjects/NewsApp/app/src/main/res/drawable/ripple.xml" value="0.1985" />
         <entry key="..\:/ASProjects/NewsApp/app/src/main/res/drawable/ripple_selector.xml" value="0.1985" />
         <entry key="..\:/ASProjects/NewsApp/app/src/main/res/drawable/rounded_background.xml" value="0.1985" />
-        <entry key="..\:/ASProjects/NewsApp/app/src/main/res/layout/activity_news.xml" value="0.3532608695652174" />
+        <entry key="..\:/ASProjects/NewsApp/app/src/main/res/layout/activity_news.xml" value="0.22" />
         <entry key="..\:/ASProjects/NewsApp/app/src/main/res/layout/fragment_breaking_news.xml" value="0.23958333333333334" />
         <entry key="..\:/ASProjects/NewsApp/app/src/main/res/layout/fragment_search_news.xml" value="0.23958333333333334" />
       </map>

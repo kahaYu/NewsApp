@@ -19,7 +19,7 @@ fun Activity.hideSystemUI() {
             // and SYSTEM_UI_FLAG_FULLSCREEN.
             it.hide(WindowInsets.Type.navigationBars())
             //window.statusBarColor = getColor(R.color.transparent)
-            //window.setDecorFitsSystemWindows(true)
+            //window.setDecorFitsSystemWindows(false)
         }
     } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
         @Suppress("DEPRECATION")
