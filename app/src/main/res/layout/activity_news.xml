@@ -21,7 +21,8 @@
         android:layout_height="56dp"
         android:background="@drawable/rounded_background"
         app:elevation="15dp"
-        app:itemRippleColor="@color/ripple_selector"
+        app:itemRippleColor="@color/transparent"
+        app:itemBackground="@drawable/ripple"
         app:layout_constraintBottom_toBottomOf="parent"
         app:menu="@menu/bottom_navigation_menu" />
 
