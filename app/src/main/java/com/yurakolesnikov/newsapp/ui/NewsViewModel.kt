@@ -39,6 +39,8 @@ class NewsViewModel(
 
     var totalResults = 0
 
+    var isTooManyRequests = false
+
     var previousInternetStateBreakingNews = true
     var previousInternetStateSearchNews = true
 
@@ -75,8 +77,10 @@ class NewsViewModel(
                 when {
                     response.isSuccessful ->
                         breakingNews.postValue(handleBreakingNewsResponse(response))
-                    response.code() == 429 ->
+                    response.code() == 429 -> {
                         breakingNews.postValue(Resource.Error("too many requests"))
+                        isTooManyRequests = true
+                    }
                     !response.isSuccessful ->
                         breakingNews.postValue(Resource.Error(response.message()))
                 }
@@ -109,8 +113,10 @@ class NewsViewModel(
                 when {
                     response.isSuccessful ->
                         searchNews.postValue(handleSearchNewsResponse(response))
-                    response.code() == 429 ->
+                    response.code() == 429 -> {
                         searchNews.postValue(Resource.Error("too many requests"))
+                        isTooManyRequests = true
+                    }
                     !response.isSuccessful ->
                         searchNews.postValue(Resource.Error(response.message()))
                 }

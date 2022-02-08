@@ -126,6 +126,9 @@ class BreakingNewsFragment : Fragment() {
                     viewModel.breakingNews.postValue(Resource.Error("no internet connection"))
             }
 
+            if (viewModel.isTooManyRequests)
+                viewModel.breakingNews.postValue(Resource.Error("too many requests"))
+
         }
 
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
