@@ -38,6 +38,7 @@ class SavedNewsFragment : Fragment() {
         newsAdapter.setOnItemClickListener {
             viewModel.articleForArticleFragment = it
             findNavController().navigate(R.id.action_savedNewsFragment_to_articleFragment)
+            viewModel.isTransactionFromSavedNewsFragment = true
         }
 
         val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(

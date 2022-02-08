@@ -32,11 +32,15 @@ class ArticleFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         viewModel = (activity as NewsActivity).viewModel
 
+        if (viewModel.isTransactionFromSavedNewsFragment) {
+            binding.fab.visibility = View.GONE
+            viewModel.isTransactionFromSavedNewsFragment = false
+        }
+
         binding.webView.apply {
             webViewClient = WebViewClient()
             viewModel.articleForArticleFragment?.let { loadUrl(it.url ?: "") }
             }
-
 
         binding.fab.setOnClickListener {
             viewModel.articleForArticleFragment?.let { viewModel.saveArticle(it) }

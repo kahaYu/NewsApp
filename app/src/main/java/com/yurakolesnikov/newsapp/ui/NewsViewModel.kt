@@ -46,6 +46,8 @@ class NewsViewModel(
 
     var toastShowTime = 0L
 
+    var isTransactionFromSavedNewsFragment = false
+
     init {
         getBreakingNews("us")
     }
