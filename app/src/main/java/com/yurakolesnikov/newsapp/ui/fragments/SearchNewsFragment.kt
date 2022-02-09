@@ -163,6 +163,7 @@ class SearchNewsFragment : Fragment() {
             adapter = newsAdapter
             layoutManager = LinearLayoutManager(activity)
             addOnScrollListener(this@SearchNewsFragment.scrollListener)
+            setHasFixedSize(true)
         }
     }
 

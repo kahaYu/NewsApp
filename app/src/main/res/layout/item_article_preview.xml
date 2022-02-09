@@ -4,7 +4,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="8dp">
+    android:layout_marginBottom="5dp"
+    android:layout_marginTop="5dp"
+    android:elevation="15dp"
+    android:background="@drawable/ripple_viewholder"
+    android:layout_marginStart="8dp"
+    android:layout_marginEnd="8dp"
+    android:paddingStart="18dp"
+    android:paddingEnd="18dp"
+    android:paddingTop="18dp"
+    android:paddingBottom="18dp">
 
     <ImageView
         android:id="@+id/ivArticleImage"
@@ -30,7 +39,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:ellipsize="end"
-        android:maxLines="3"
+        android:maxLines="2"
         android:text="TITLE"
         android:textColor="@android:color/black"
         android:textSize="15sp"
@@ -46,7 +55,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
         android:ellipsize="end"
-        android:maxLines="5"
+        android:maxLines="4"
         android:text="DESCRIPTION"
         android:textColor="@android:color/black"
         app:layout_constraintEnd_toEndOf="parent"

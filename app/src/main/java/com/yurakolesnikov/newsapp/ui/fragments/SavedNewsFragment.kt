@@ -79,6 +79,7 @@ class SavedNewsFragment : Fragment() {
         binding.rvSavedNews.apply {
             adapter = newsAdapter
             layoutManager = LinearLayoutManager(activity)
+            setHasFixedSize(true)
         }
     }
 

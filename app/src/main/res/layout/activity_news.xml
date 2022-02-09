@@ -5,8 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ui.NewsActivity"
-    android:background="@drawable/opt1">
+    tools:context=".ui.NewsActivity">
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/newsNavHostFragment"
@@ -23,7 +22,7 @@
         android:background="@drawable/rounded_background"
         app:elevation="15dp"
         app:itemRippleColor="@color/transparent"
-        app:itemBackground="@drawable/ripple"
+        app:itemBackground="@drawable/ripple_nav_bar"
         app:layout_constraintBottom_toBottomOf="parent"
         app:menu="@menu/bottom_navigation_menu" />
 

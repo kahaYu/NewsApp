@@ -142,6 +142,7 @@ class BreakingNewsFragment : Fragment() {
             adapter = newsAdapter
             layoutManager = LinearLayoutManager(activity)
             addOnScrollListener(this@BreakingNewsFragment.scrollListener)
+            setHasFixedSize(true)
         }
     }
 
