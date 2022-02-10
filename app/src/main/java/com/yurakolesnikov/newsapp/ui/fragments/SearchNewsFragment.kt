@@ -1,11 +1,10 @@
 package com.yurakolesnikov.newsapp.ui.fragments
 
+import android.annotation.SuppressLint
 import android.os.Bundle
-import android.text.Editable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
@@ -13,6 +12,7 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import com.yurakolesnikov.newsapp.R
 import com.yurakolesnikov.newsapp.adapters.NewsAdapter
 import com.yurakolesnikov.newsapp.databinding.FragmentSearchNewsBinding
@@ -20,13 +20,13 @@ import com.yurakolesnikov.newsapp.models.Article
 import com.yurakolesnikov.newsapp.ui.NewsViewModel
 import com.yurakolesnikov.newsapp.ui.NewsActivity
 import com.yurakolesnikov.newsapp.utils.AutoClearedValue
-import com.yurakolesnikov.newsapp.utils.Constants
 import com.yurakolesnikov.newsapp.utils.Constants.Companion.SEARCH_NEWS_TIME_DELAY
 import com.yurakolesnikov.newsapp.utils.Resource
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.*
 
 class SearchNewsFragment : Fragment() {
 
@@ -39,6 +39,7 @@ class SearchNewsFragment : Fragment() {
 
     var job: Job? = null
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -48,11 +49,26 @@ class SearchNewsFragment : Fragment() {
         return binding.root
     }
 
+    @SuppressLint("NotifyDataSetChanged", "ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel = (activity as NewsActivity).viewModel
 
         setupRecyclerView()
+
+        binding.etSearch.setOnClickListener{
+            viewModel.previousInputState = viewModel.currentInputState
+            viewModel.currentInputState = true
+        }
+
+        //view.setOnTouchListener(object : View.OnTouchListener {
+        //    override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+        //        when (event?.action) {
+        //            MotionEvent.ACTION_DOWN -> hideKeyboard()
+        //        }
+        //        return v?.onTouchEvent(event) ?: true
+        //    }
+        //})
 
         newsAdapter.setOnItemClickListener {
             viewModel.articleForArticleFragment = it
@@ -88,11 +104,9 @@ class SearchNewsFragment : Fragment() {
                     response.data?.let { newsResponse ->
                         if (binding.etSearch.text.isNotEmpty()) {
                             newsAdapter.differ.submitList(newsResponse.articles.toList())
-                            val rangeStart =
-                                (viewModel.searchNewsPage - 2) * Constants.QUERY_PAGE_SIZE + 1
-                            val itemCount = newsResponse.articles.size - rangeStart + 1
-                            newsAdapter.notifyItemRangeInserted(rangeStart, itemCount)
-                            viewModel.totalResults = newsResponse.totalResults
+                            // Too complicated to track deletions, updates etc.
+                            // We don't have much results, this method won't affect to productivity
+                            newsAdapter.notifyDataSetChanged()
                             viewModel.totalResults = newsResponse.totalResults
                         } else newsAdapter.differ.submitList(listOf<Article>())
                     }
@@ -100,7 +114,7 @@ class SearchNewsFragment : Fragment() {
                 is Resource.Error -> {
                     hideProgressBar()
                     response.message?.let { message ->
-                        viewModel.showSafeToast(requireActivity(), message)
+                        showSafeToast(view, message)
                     }
                 }
                 is Resource.Loading -> {
@@ -128,14 +142,20 @@ class SearchNewsFragment : Fragment() {
     }
 
     private val scrollListener = object : RecyclerView.OnScrollListener() {
+
+        @SuppressLint("ClickableViewAccessibility")
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             super.onScrollStateChanged(recyclerView, newState)
 
             if (viewModel.searchNewsResponse == null
-                &&!viewModel.previousInternetStateSearchNews
-                && viewModel.hasInternetConnection()) {
+                && !viewModel.previousInternetStateSearchNews
+                && viewModel.hasInternetConnection()
+            ) {
                 viewModel.searchNews(binding.etSearch.text.toString())
             }
+
+            viewModel.previousInputState = viewModel.currentInputState
+            viewModel.currentInputState = false
         }
 
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -164,6 +184,15 @@ class SearchNewsFragment : Fragment() {
             layoutManager = LinearLayoutManager(activity)
             addOnScrollListener(this@SearchNewsFragment.scrollListener)
             setHasFixedSize(true)
+        }
+    }
+
+    fun showSafeToast(view: View, text: String) {
+        if (Calendar.getInstance().timeInMillis >= viewModel.toastShowTime + 4000L) {
+            val snackbar = Snackbar.make(view, "Error: $text", Snackbar.LENGTH_LONG)
+            snackbar.view.background = resources.getDrawable(R.drawable.snackbar_background)
+            snackbar.show()
+            viewModel.toastShowTime = Calendar.getInstance().timeInMillis
         }
     }
 

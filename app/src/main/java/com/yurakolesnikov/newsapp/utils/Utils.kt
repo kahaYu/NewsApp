@@ -1,10 +1,15 @@
 package com.yurakolesnikov.newsapp.utils
 
 import android.app.Activity
+import android.content.Context
 import android.os.Build
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
+import android.view.inputmethod.InputMethodManager
+import androidx.fragment.app.Fragment
+import java.text.SimpleDateFormat
+import java.util.*
 
 fun Activity.hideSystemUI() {
 
@@ -54,4 +59,17 @@ fun Double.roundToNextInt(): Int {
         }
         else -> throw Exception("Input for function roundToNextInt can't be less than 0")
     }
+}
+
+fun String.formatDate(): String {
+    return "${this[8]}${this[9]}.${this[5]}${this[6]}.${this[0]}${this[1]}${this[2]}${this[3]}"
+}
+
+fun Fragment.hideKeyboard() {
+    view?.let {activity?.hideKeyboard(it)}
+}
+
+fun Context.hideKeyboard(view: View) {
+    val inputMethodManager = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+    inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
 }

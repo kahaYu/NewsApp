@@ -2,6 +2,7 @@ package com.yurakolesnikov.newsapp.models
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.yurakolesnikov.newsapp.utils.formatDate
 import java.io.Serializable
 
 @Entity(
@@ -18,4 +19,6 @@ data class Article(
     val title: String?,
     val url: String?,
     val urlToImage: String?
-) : Serializable
+) : Serializable {
+    fun getFormattedPublishedAt () = publishedAt?.formatDate()
+}

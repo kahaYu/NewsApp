@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.google.android.material.snackbar.Snackbar
 import com.yurakolesnikov.newsapp.NewsApplication
 import com.yurakolesnikov.newsapp.models.Article
 import com.yurakolesnikov.newsapp.models.NewsResponse
@@ -47,6 +48,9 @@ class NewsViewModel(
     var toastShowTime = 0L
 
     var isTransactionFromSavedNewsFragment = false
+
+    var currentInputState = false
+    var previousInputState = false
 
     init {
         getBreakingNews("us")
@@ -167,12 +171,5 @@ class NewsViewModel(
             }
         }
         return false
-    }
-
-    fun showSafeToast(activity: Activity, text: String) {
-        if (Calendar.getInstance().timeInMillis >= toastShowTime + 4000L) {
-            Toast.makeText(activity, "An error occurred: $text", Toast.LENGTH_LONG).show()
-            toastShowTime = Calendar.getInstance().timeInMillis
-        }
     }
 }

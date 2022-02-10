@@ -1,16 +1,19 @@
 package com.yurakolesnikov.newsapp.ui.fragments
 
+import android.app.Activity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.view.marginBottom
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import com.yurakolesnikov.newsapp.R
 import com.yurakolesnikov.newsapp.adapters.NewsAdapter
 import com.yurakolesnikov.newsapp.databinding.FragmentBreakingNewsBinding
@@ -66,8 +69,8 @@ class BreakingNewsFragment : Fragment() {
                     hideProgressBar()
                     response.data?.let { newsResponse ->
                         newsAdapter.differ.submitList(newsResponse.articles.toList())
-                        val rangeStart = (viewModel.breakingNewsPage - 2) * QUERY_PAGE_SIZE + 1
-                        val itemCount = newsResponse.articles.size - rangeStart + 1
+                        val rangeStart = (viewModel.breakingNewsPage - 2) * QUERY_PAGE_SIZE
+                        val itemCount = newsResponse.articles.size - rangeStart
                         newsAdapter.notifyItemRangeInserted(rangeStart, itemCount)
                         viewModel.totalResults = newsResponse.totalResults
                     }
@@ -75,7 +78,7 @@ class BreakingNewsFragment : Fragment() {
                 is Resource.Error -> {
                     hideProgressBar()
                     response.message?.let { message ->
-                        viewModel.showSafeToast(requireActivity(), message)
+                        showSafeToast(view, message)
                     }
                 }
                 is Resource.Loading -> {
@@ -149,5 +152,14 @@ class BreakingNewsFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         viewModel.breakingNews = MutableLiveData()
+    }
+
+    fun showSafeToast(view: View, text: String) {
+        if (Calendar.getInstance().timeInMillis >= viewModel.toastShowTime + 4000L) {
+            val snackbar = Snackbar.make(view, "Error: $text", Snackbar.LENGTH_LONG)
+            snackbar.view.background = resources.getDrawable(R.drawable.snackbar_background)
+            snackbar.show()
+            viewModel.toastShowTime = Calendar.getInstance().timeInMillis
+        }
     }
 }

@@ -10,6 +10,7 @@ import com.bumptech.glide.Glide
 import com.yurakolesnikov.newsapp.R
 import com.yurakolesnikov.newsapp.databinding.ItemArticlePreviewBinding
 import com.yurakolesnikov.newsapp.models.Article
+import com.yurakolesnikov.newsapp.utils.formatDate
 
 class NewsAdapter : RecyclerView.Adapter<NewsAdapter.ArticleViewHolder>() {
 
@@ -46,7 +47,7 @@ class NewsAdapter : RecyclerView.Adapter<NewsAdapter.ArticleViewHolder>() {
             tvSource.text = article.source?.name
             tvTitle.text = article.title
             tvDescription.text = article.description
-            tvPublishedAt.text = article.publishedAt
+            tvPublishedAt.text = article.getFormattedPublishedAt()
         }
         holder.itemView.setOnClickListener {
             onItemClickListener?.let { it(article) }
