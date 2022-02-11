@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
@@ -17,7 +18,7 @@ import com.yurakolesnikov.newsapp.utils.hideSystemUI
 
 class NewsActivity : AppCompatActivity() {
 
-    lateinit var viewModel : NewsViewModel
+    lateinit var viewModel: NewsViewModel
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,18 +33,17 @@ class NewsActivity : AppCompatActivity() {
         val viewModelProviderFactory = NewsViewModelProviderFactory(application, newsRepository)
         viewModel = ViewModelProvider(this, viewModelProviderFactory).get(NewsViewModel::class.java)
 
-        val navHostFragment = supportFragmentManager.findFragmentById(R.id.newsNavHostFragment) as NavHostFragment
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.newsNavHostFragment) as NavHostFragment
         binding.bottomNavigationView.setupWithNavController(navHostFragment.navController)
 
     }
-    // Настроить тут появление и сокрытие клавиатуры
-    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
-        if (currentFocus != null
-            && viewModel.previousInputState == viewModel.currentInputState
-            && viewModel.currentInputState) {
-            val imm = this.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.hideSoftInputFromWindow(this.currentFocus!!.windowToken, 0)
-        }
-        return super.dispatchTouchEvent(ev)
-    }
+
+    //override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
+    //    if (currentFocus != null) {
+    //        val imm = this.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    //        imm.hideSoftInputFromWindow(this.currentFocus!!.windowToken, 0)
+    //    }
+    //    return super.dispatchTouchEvent(ev)
+    //}
 }

@@ -49,9 +49,6 @@ class NewsViewModel(
 
     var isTransactionFromSavedNewsFragment = false
 
-    var currentInputState = false
-    var previousInputState = false
-
     init {
         getBreakingNews("us")
     }

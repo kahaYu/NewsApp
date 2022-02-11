@@ -3,6 +3,7 @@ package com.yurakolesnikov.newsapp.ui.fragments
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.widget.addTextChangedListener
@@ -22,6 +23,7 @@ import com.yurakolesnikov.newsapp.ui.NewsActivity
 import com.yurakolesnikov.newsapp.utils.AutoClearedValue
 import com.yurakolesnikov.newsapp.utils.Constants.Companion.SEARCH_NEWS_TIME_DELAY
 import com.yurakolesnikov.newsapp.utils.Resource
+import com.yurakolesnikov.newsapp.utils.hideKeyboard
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
@@ -56,19 +58,9 @@ class SearchNewsFragment : Fragment() {
 
         setupRecyclerView()
 
-        binding.etSearch.setOnClickListener{
-            viewModel.previousInputState = viewModel.currentInputState
-            viewModel.currentInputState = true
+        binding.etSearch.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) hideKeyboard()
         }
-
-        //view.setOnTouchListener(object : View.OnTouchListener {
-        //    override fun onTouch(v: View?, event: MotionEvent?): Boolean {
-        //        when (event?.action) {
-        //            MotionEvent.ACTION_DOWN -> hideKeyboard()
-        //        }
-        //        return v?.onTouchEvent(event) ?: true
-        //    }
-        //})
 
         newsAdapter.setOnItemClickListener {
             viewModel.articleForArticleFragment = it
@@ -154,8 +146,7 @@ class SearchNewsFragment : Fragment() {
                 viewModel.searchNews(binding.etSearch.text.toString())
             }
 
-            viewModel.previousInputState = viewModel.currentInputState
-            viewModel.currentInputState = false
+            binding.etSearch.clearFocus()
         }
 
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -195,5 +186,4 @@ class SearchNewsFragment : Fragment() {
             viewModel.toastShowTime = Calendar.getInstance().timeInMillis
         }
     }
-
 }
