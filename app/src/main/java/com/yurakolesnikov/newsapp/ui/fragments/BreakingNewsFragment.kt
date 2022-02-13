@@ -151,7 +151,7 @@ class BreakingNewsFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        viewModel.breakingNews = MutableLiveData()
+        if (this::viewModel.isInitialized) viewModel.breakingNews = MutableLiveData()
     }
 
     fun showSafeToast(view: View, text: String) {

@@ -16,7 +16,6 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:windowSoftInputMode="adjustPan|stateAlwaysHidden"
             android:name="com.yurakolesnikov.newsapp.ui.NewsActivity"
             android:exported="true">
             <intent-filter>

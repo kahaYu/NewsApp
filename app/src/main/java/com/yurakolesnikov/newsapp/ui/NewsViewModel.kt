@@ -3,6 +3,7 @@ package com.yurakolesnikov.newsapp.ui
 import android.app.Activity
 import android.app.Application
 import android.content.Context
+import android.content.res.Configuration
 import android.net.ConnectivityManager
 import android.net.ConnectivityManager.*
 import android.net.NetworkCapabilities.*
@@ -48,6 +49,9 @@ class NewsViewModel(
     var toastShowTime = 0L
 
     var isTransactionFromSavedNewsFragment = false
+
+    var previousOrientation  = Configuration.ORIENTATION_PORTRAIT
+    var currentOrientation  = Configuration.ORIENTATION_PORTRAIT
 
     init {
         getBreakingNews("us")

@@ -72,21 +72,23 @@ class SearchNewsFragment : Fragment() {
 
         binding.etSearch.addTextChangedListener { editable ->
             job?.cancel()
-            job = MainScope().launch {
-                delay(SEARCH_NEWS_TIME_DELAY)
-                editable?.let {
-                    viewModel.searchNewsPage = 1
-                    viewModel.searchNewsResponse = null
-                    if (editable.toString()
-                            .isNotEmpty() && editable.toString() != viewModel.lastSearchQuery
-                    ) {
-                        viewModel.searchNews(editable.toString())
-                    } else if (editable.toString().isEmpty()) {
-                        newsAdapter.differ.submitList(listOf<Article>())
-                        viewModel.lastSearchQuery = ""
+            if (viewModel.previousOrientation == viewModel.currentOrientation) {
+                job = MainScope().launch {
+                    delay(SEARCH_NEWS_TIME_DELAY)
+                    editable?.let {
+                        viewModel.searchNewsPage = 1
+                        viewModel.searchNewsResponse = null
+                        if (editable.toString()
+                                .isNotEmpty() && editable.toString() != viewModel.lastSearchQuery
+                        ) {
+                            viewModel.searchNews(editable.toString())
+                        } else if (editable.toString().isEmpty()) {
+                            newsAdapter.differ.submitList(listOf<Article>())
+                            viewModel.lastSearchQuery = ""
+                        }
                     }
                 }
-            }
+            } else viewModel.previousOrientation = viewModel.currentOrientation
         }
 
         viewModel.searchNews.observe(viewLifecycleOwner, Observer { response ->
@@ -121,6 +123,7 @@ class SearchNewsFragment : Fragment() {
         super.onDestroy()
         viewModel.searchNews = MutableLiveData()
         job?.cancel()
+
     }
 
     private fun hideProgressBar() {

@@ -2,6 +2,7 @@ package com.yurakolesnikov.newsapp.ui
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.Configuration
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MotionEvent
@@ -29,9 +30,13 @@ class NewsActivity : AppCompatActivity() {
         hideSystemUI()
         supportActionBar?.hide()
 
+
+
         val newsRepository = NewsRepository(ArticleDatabase(this))
         val viewModelProviderFactory = NewsViewModelProviderFactory(application, newsRepository)
         viewModel = ViewModelProvider(this, viewModelProviderFactory).get(NewsViewModel::class.java)
+
+        viewModel.currentOrientation = resources.configuration.orientation
 
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.newsNavHostFragment) as NavHostFragment
@@ -39,11 +44,8 @@ class NewsActivity : AppCompatActivity() {
 
     }
 
-    //override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
-    //    if (currentFocus != null) {
-    //        val imm = this.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-    //        imm.hideSoftInputFromWindow(this.currentFocus!!.windowToken, 0)
-    //    }
-    //    return super.dispatchTouchEvent(ev)
-    //}
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel.previousOrientation = viewModel.currentOrientation
+    }
 }
