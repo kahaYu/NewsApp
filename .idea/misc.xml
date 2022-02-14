@@ -6,7 +6,11 @@
         <entry key="..\:/ASProjects/NewsApp/app/src/main/res/drawable/background_item_article.xml" value="0.1985" />
         <entry key="..\:/ASProjects/NewsApp/app/src/main/res/drawable/bd_main_bitmap.xml" value="0.196" />
         <entry key="..\:/ASProjects/NewsApp/app/src/main/res/drawable/ic_all_news.xml" value="0.196" />
+        <entry key="..\:/ASProjects/NewsApp/app/src/main/res/drawable/ic_breaking_news.xml" value="0.161" />
+        <entry key="..\:/ASProjects/NewsApp/app/src/main/res/drawable/ic_dark_mode.xml" value="0.161" />
         <entry key="..\:/ASProjects/NewsApp/app/src/main/res/drawable/ic_favorite.xml" value="0.1985" />
+        <entry key="..\:/ASProjects/NewsApp/app/src/main/res/drawable/ic_light_mode.xml" value="0.161" />
+        <entry key="..\:/ASProjects/NewsApp/app/src/main/res/drawable/mode_selector.xml" value="0.161" />
         <entry key="..\:/ASProjects/NewsApp/app/src/main/res/drawable/ripple.xml" value="0.1985" />
         <entry key="..\:/ASProjects/NewsApp/app/src/main/res/drawable/ripple_nav_bar.xml" value="0.196" />
         <entry key="..\:/ASProjects/NewsApp/app/src/main/res/drawable/ripple_selector.xml" value="0.1985" />
@@ -21,6 +25,8 @@
         <entry key="..\:/ASProjects/NewsApp/app/src/main/res/layout/fragment_breaking_news.xml" value="0.23958333333333334" />
         <entry key="..\:/ASProjects/NewsApp/app/src/main/res/layout/fragment_search_news.xml" value="0.23958333333333334" />
         <entry key="..\:/ASProjects/NewsApp/app/src/main/res/layout/item_article_preview.xml" value="0.33" />
+        <entry key="..\:/ASProjects/NewsApp/app/src/main/res/menu/bottom_navigation_menu.xml" value="0.35104166666666664" />
+        <entry key="..\:/ASProjects/NewsApp/app/src/main/res/menu/drawer_menu.xml" value="0.35104166666666664" />
       </map>
     </option>
   </component>

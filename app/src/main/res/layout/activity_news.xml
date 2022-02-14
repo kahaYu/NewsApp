@@ -17,13 +17,32 @@
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigationView"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="56dp"
+        android:layout_marginStart="8dp"
         android:background="@drawable/rounded_background"
+        android:foregroundGravity="bottom"
         app:elevation="15dp"
-        app:itemRippleColor="@color/transparent"
         app:itemBackground="@drawable/ripple_nav_bar"
+        app:itemRippleColor="@color/transparent"
+        app:labelVisibilityMode="selected"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/btNightMode"
         app:menu="@menu/bottom_navigation_menu" />
 
+    <ImageButton
+        android:id="@+id/btNightMode"
+        android:layout_width="72dp"
+        android:layout_height="56dp"
+        android:background="@drawable/rounded_background"
+        android:elevation="15dp"
+        android:padding="16dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/mode_selector"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
+
+
