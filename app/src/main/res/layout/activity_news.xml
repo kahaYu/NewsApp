@@ -5,7 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ui.NewsActivity">
+    tools:context=".ui.NewsActivity"
+    android:background="@color/white">
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/newsNavHostFragment"
@@ -19,7 +20,7 @@
         android:id="@+id/bottomNavigationView"
         android:layout_width="0dp"
         android:layout_height="56dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="4dp"
         android:background="@drawable/rounded_background"
         android:foregroundGravity="bottom"
         app:elevation="15dp"
@@ -28,20 +29,31 @@
         app:labelVisibilityMode="selected"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/btNightMode"
+        app:layout_constraintStart_toEndOf="@+id/bottomModeLayout"
         app:menu="@menu/bottom_navigation_menu" />
 
-    <ImageButton
-        android:id="@+id/btNightMode"
+    <FrameLayout
+        android:id="@+id/bottomModeLayout"
         android:layout_width="72dp"
         android:layout_height="56dp"
-        android:background="@drawable/rounded_background"
         android:elevation="15dp"
-        android:padding="16dp"
-        android:scaleType="centerInside"
-        android:src="@drawable/mode_selector"
+        android:background="@drawable/rounded_background"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent">
+
+        <CheckBox
+            android:id="@+id/cbMode"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:background="@drawable/mode_selector"
+            android:layout_gravity="center"
+            android:button="@color/transparent"
+            android:scaleX="0.5"
+            android:scaleY="0.5"
+            />
+
+    </FrameLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

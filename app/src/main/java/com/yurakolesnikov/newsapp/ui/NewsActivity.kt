@@ -7,7 +7,11 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
+import android.widget.CheckBox
 import android.widget.EditText
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
+import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
@@ -30,7 +34,10 @@ class NewsActivity : AppCompatActivity() {
         hideSystemUI()
         supportActionBar?.hide()
 
-
+        binding.cbMode.setOnClickListener {
+            if ((it as CheckBox).isChecked) AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_YES)
+            else AppCompatDelegate.setDefaultNightMode(MODE_NIGHT_NO)
+        }
 
         val newsRepository = NewsRepository(ArticleDatabase(this))
         val viewModelProviderFactory = NewsViewModelProviderFactory(application, newsRepository)

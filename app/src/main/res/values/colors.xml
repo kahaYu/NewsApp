@@ -10,4 +10,7 @@
     <color name="grey_snackbar">#838383</color>
     <color name="grey_light">#ededed</color>
     <color name="main_transparent">#1A31C1FF</color>
+    <color name="black">#000000</color>
+    <color name="viewHolder">#FFFFFF</color>
+    <color name="navBar">#FFFFFF</color>
 </resources>
