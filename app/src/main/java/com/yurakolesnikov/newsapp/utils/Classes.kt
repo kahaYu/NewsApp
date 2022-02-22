@@ -33,3 +33,4 @@ class AutoClearedValue<T : Any>(val fragment: Fragment) : ReadWriteProperty<Frag
         _value = value
     }
 }
+

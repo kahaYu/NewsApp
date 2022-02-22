@@ -17,6 +17,7 @@ import com.yurakolesnikov.newsapp.NewsApplication
 import com.yurakolesnikov.newsapp.models.Article
 import com.yurakolesnikov.newsapp.models.NewsResponse
 import com.yurakolesnikov.newsapp.repository.NewsRepository
+import com.yurakolesnikov.newsapp.utils.Mode
 import com.yurakolesnikov.newsapp.utils.Resource
 import kotlinx.coroutines.launch
 import retrofit2.Response
@@ -50,8 +51,11 @@ class NewsViewModel(
 
     var isTransactionFromSavedNewsFragment = false
 
-    var previousOrientation  = Configuration.ORIENTATION_PORTRAIT
-    var currentOrientation  = Configuration.ORIENTATION_PORTRAIT
+    var previousOrientation = Configuration.ORIENTATION_PORTRAIT
+    var currentOrientation = Configuration.ORIENTATION_PORTRAIT
+
+    var previousMode = Mode.DAY
+    var currentMode = Mode.DAY
 
     init {
         getBreakingNews("us")

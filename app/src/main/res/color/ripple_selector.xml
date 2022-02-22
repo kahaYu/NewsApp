@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:color="@color/grey_transparent" android:state_selected="false"/>
-    <item android:color="@color/main_transparent" />
+    <item android:color="@color/rippleInactive" android:state_selected="false"/>
+    <item android:color="@color/rippleActive" />
 </selector>

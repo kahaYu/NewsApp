@@ -9,3 +9,8 @@ class Constants {
         const val QUERY_PAGE_SIZE = 20
     }
 }
+
+enum class Mode {
+    NIGHT,
+    DAY
+}

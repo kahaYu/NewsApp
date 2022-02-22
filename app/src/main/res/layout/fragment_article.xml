@@ -16,13 +16,13 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="25dp"
         android:layout_marginBottom="81dp"
-        android:backgroundTint="@color/main_accent"
+        android:backgroundTint="@color/colorAccent"
         android:src="@drawable/ic_favorite"
-        app:backgroundTint="@color/main_accent"
+        app:backgroundTint="@color/colorAccent"
         app:fabSize="normal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:tint="@android:color/white" />
+        app:tint="@color/viewHolder" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

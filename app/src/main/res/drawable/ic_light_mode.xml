@@ -2,6 +2,6 @@
 <bitmap
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:src="@drawable/sun_png"
-    android:tint="@color/dark_mode">
+    android:tint="@color/colorPrimary">
 </bitmap>
 

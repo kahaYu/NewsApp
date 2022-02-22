@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="main">#00189A</color>
-    <color name="main_accent">#00189A</color>
-    <color name="dark_mode">#00189A</color>
-    <color name="white">#FFFFFFFF</color>
-    <color name="red">#FF0000</color>
+    <color name="colorPrimary">#283593</color>
+    <color name="colorAccent">#001064</color>
+
+    <color name="background">#FFFFFFFF</color>
     <color name="transparent">#00FFFFFF</color>
-    <color name="grey_transparent">#33838383</color>
-    <color name="grey_snackbar">#838383</color>
-    <color name="grey_light">#ededed</color>
-    <color name="main_transparent">#1A31C1FF</color>
-    <color name="black">#000000</color>
+
+    <color name="rippleInactive">#33838383</color>
+    <color name="rippleActive">#33283593</color>
+
+    <color name="snackbar">#838383</color>
+    <color name="editTextInactive">#5f5fc4</color>
+
+    <color name="textColor">#000000</color>
     <color name="viewHolder">#FFFFFF</color>
     <color name="navBar">#FFFFFF</color>
 </resources>

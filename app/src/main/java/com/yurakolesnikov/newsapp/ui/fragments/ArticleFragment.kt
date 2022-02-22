@@ -7,6 +7,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebViewClient
 import androidx.fragment.app.Fragment
+import androidx.webkit.WebSettingsCompat
+import androidx.webkit.WebViewFeature
 import com.google.android.material.snackbar.Snackbar
 import com.yurakolesnikov.newsapp.databinding.FragmentArticleBinding
 import com.yurakolesnikov.newsapp.ui.NewsViewModel
@@ -31,6 +33,10 @@ class ArticleFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel = (activity as NewsActivity).viewModel
+
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK) && (activity as NewsActivity).isDarkModeOn()) {
+            WebSettingsCompat.setForceDark(binding.webView.settings, WebSettingsCompat.FORCE_DARK_ON)
+        }
 
         if (viewModel.isTransactionFromSavedNewsFragment) {
             binding.fab.visibility = View.GONE

@@ -1,6 +1,7 @@
 package com.yurakolesnikov.newsapp.ui.fragments
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -72,7 +73,8 @@ class SearchNewsFragment : Fragment() {
 
         binding.etSearch.addTextChangedListener { editable ->
             job?.cancel()
-            if (viewModel.previousOrientation == viewModel.currentOrientation) {
+            if (viewModel.previousOrientation == viewModel.currentOrientation
+                && viewModel.previousMode == viewModel.currentMode) {
                 job = MainScope().launch {
                     delay(SEARCH_NEWS_TIME_DELAY)
                     editable?.let {
@@ -88,7 +90,11 @@ class SearchNewsFragment : Fragment() {
                         }
                     }
                 }
-            } else viewModel.previousOrientation = viewModel.currentOrientation
+            } else {
+                viewModel.previousOrientation = viewModel.currentOrientation
+                viewModel.previousMode = viewModel.currentMode
+            }
+
         }
 
         viewModel.searchNews.observe(viewLifecycleOwner, Observer { response ->
@@ -119,11 +125,10 @@ class SearchNewsFragment : Fragment() {
         })
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         viewModel.searchNews = MutableLiveData()
         job?.cancel()
-
     }
 
     private fun hideProgressBar() {
