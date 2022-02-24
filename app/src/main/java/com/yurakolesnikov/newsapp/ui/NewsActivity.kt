@@ -39,10 +39,10 @@ class NewsActivity : AppCompatActivity() {
         hideSystemUI()
         supportActionBar?.hide()
 
-        binding.cbMode.isChecked = isDarkModeOn()
+        binding.cbMode.isChecked = isDarkModeOn() // Recover state of mode CheckBox
 
         WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars =
-            !isDarkModeOn()
+            !isDarkModeOn() // Change color of status bar depending on mode
 
         binding.cbMode.setOnClickListener {
             if (isDarkModeOn()) {
@@ -56,10 +56,11 @@ class NewsActivity : AppCompatActivity() {
         val viewModelProviderFactory = NewsViewModelProviderFactory(application, newsRepository)
         viewModel = ViewModelProvider(this, viewModelProviderFactory).get(NewsViewModel::class.java)
 
-        viewModel.currentOrientation = resources.configuration.orientation
+        viewModel.currentOrientation =
+            resources.configuration.orientation // Track current orientation for search fragment
 
         if (isDarkModeOn()) viewModel.currentMode = Mode.NIGHT
-        else viewModel.currentMode = Mode.DAY
+        else viewModel.currentMode = Mode.DAY // Track current mode for search fragment
 
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.newsNavHostFragment) as NavHostFragment
@@ -69,8 +70,8 @@ class NewsActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-            viewModel.previousOrientation = viewModel.currentOrientation
-            viewModel.previousMode = viewModel.currentMode
+        viewModel.previousOrientation = viewModel.currentOrientation
+        viewModel.previousMode = viewModel.currentMode
 
     }
 

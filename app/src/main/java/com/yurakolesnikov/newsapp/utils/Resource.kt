@@ -1,5 +1,6 @@
 package com.yurakolesnikov.newsapp.utils
 
+// Class to wrap api response
 sealed class Resource<T>(
     val data: T? = null,
     val message: String? = null

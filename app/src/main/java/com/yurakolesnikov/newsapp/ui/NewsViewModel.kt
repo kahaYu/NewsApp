@@ -26,7 +26,7 @@ import java.util.*
 
 class NewsViewModel(
     val newsRepository: NewsRepository,
-    app: Application
+    app: Application // Need application to check internet state
 ) : AndroidViewModel(app) {
 
     var breakingNews: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
@@ -39,26 +39,23 @@ class NewsViewModel(
 
     var articleForArticleFragment: Article? = null
     var lastSearchQuery = ""
-
     var totalResults = 0
 
     var isTooManyRequests = false
-
-    var previousInternetStateBreakingNews = true
-    var previousInternetStateSearchNews = true
 
     var toastShowTime = 0L
 
     var isTransactionFromSavedNewsFragment = false
 
+    var previousInternetStateBreakingNews = true
+    var previousInternetStateSearchNews = true
     var previousOrientation = Configuration.ORIENTATION_PORTRAIT
     var currentOrientation = Configuration.ORIENTATION_PORTRAIT
-
     var previousMode = Mode.DAY
     var currentMode = Mode.DAY
 
     init {
-        getBreakingNews("us")
+        getBreakingNews("us") // Once app is started
     }
 
     fun getBreakingNews(countryCode: String) = viewModelScope.launch {
@@ -80,7 +77,7 @@ class NewsViewModel(
     fun getSavedNews() = newsRepository.getSavedNews()
 
     private suspend fun safeBreakingNewsCall(countryCode: String) {
-        breakingNews.postValue(Resource.Loading())
+        breakingNews.postValue(Resource.Loading()) // First of all progress bar appears
         try {
             previousInternetStateBreakingNews = hasInternetConnection()
             if (hasInternetConnection()) {
@@ -107,7 +104,7 @@ class NewsViewModel(
     }
 
     private fun handleBreakingNewsResponse(response: Response<NewsResponse>): Resource<NewsResponse> {
-        breakingNewsPage++
+        breakingNewsPage++ // Increase page for future request
         if (breakingNewsResponse == null) breakingNewsResponse = response.body()
         else breakingNewsResponse!!.articles.addAll(
             (response.body()?.articles) ?: listOf<Article>()

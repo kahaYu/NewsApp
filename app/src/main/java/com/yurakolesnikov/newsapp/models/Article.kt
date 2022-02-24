@@ -20,5 +20,6 @@ data class Article(
     val url: String?,
     val urlToImage: String?
 ) : Serializable {
-    fun getFormattedPublishedAt () = publishedAt?.formatDate()
+    var formattedPublishedAt =
+        publishedAt?.formatDate() // Make computations here instead of adapter
 }

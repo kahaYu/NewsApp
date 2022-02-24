@@ -22,10 +22,14 @@ class SavedNewsFragment : Fragment() {
 
     private var binding by AutoClearedValue<FragmentSavedNewsBinding>(this)
 
-    lateinit var viewModel : NewsViewModel
-    lateinit var newsAdapter : NewsAdapter
+    lateinit var viewModel: NewsViewModel
+    lateinit var newsAdapter: NewsAdapter
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         binding = FragmentSavedNewsBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -38,7 +42,7 @@ class SavedNewsFragment : Fragment() {
         newsAdapter.setOnItemClickListener {
             viewModel.articleForArticleFragment = it
             findNavController().navigate(R.id.action_savedNewsFragment_to_articleFragment)
-            viewModel.isTransactionFromSavedNewsFragment = true
+            viewModel.isTransactionFromSavedNewsFragment = true // To remove fab in article fragment
         }
 
         val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(

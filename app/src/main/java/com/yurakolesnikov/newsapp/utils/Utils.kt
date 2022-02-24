@@ -45,22 +45,6 @@ fun Activity.hideSystemUI() {
     }
 }
 
-fun Double.roundToNextInt(): Int {
-    when {
-        this == 0.0 -> return 0
-        this >= 0.0 -> {
-            if (this > this.toInt()) {
-                var result = this.toInt() + 1
-                return result
-            } else {
-                var result = this.toInt()
-                return result
-            }
-        }
-        else -> throw Exception("Input for function roundToNextInt can't be less than 0")
-    }
-}
-
 fun String.formatDate(): String {
     return "${this[8]}${this[9]}.${this[5]}${this[6]}.${this[0]}${this[1]}${this[2]}${this[3]}"
 }

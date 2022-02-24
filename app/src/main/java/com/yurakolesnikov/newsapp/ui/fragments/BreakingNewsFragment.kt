@@ -1,12 +1,9 @@
 package com.yurakolesnikov.newsapp.ui.fragments
 
-import android.app.Activity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.core.view.marginBottom
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
@@ -22,23 +19,16 @@ import com.yurakolesnikov.newsapp.ui.NewsActivity
 import com.yurakolesnikov.newsapp.utils.AutoClearedValue
 import com.yurakolesnikov.newsapp.utils.Constants.Companion.QUERY_PAGE_SIZE
 import com.yurakolesnikov.newsapp.utils.Resource
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.util.*
 
 class BreakingNewsFragment : Fragment() {
 
     private var binding by AutoClearedValue<FragmentBreakingNewsBinding>(this)
 
-    lateinit var viewModel: NewsViewModel
-    lateinit var newsAdapter: NewsAdapter
+    private lateinit var vm: NewsViewModel
+    private lateinit var newsAdapter: NewsAdapter
 
-    var isLoading = false
-
-
-    val TAG = "BreakingNewsFragment"
+    private var isLoading = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -51,28 +41,28 @@ class BreakingNewsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = (activity as NewsActivity).viewModel
+
+        vm = (activity as NewsActivity).viewModel
 
         setupRecyclerView()
 
         newsAdapter.setOnItemClickListener {
-            viewModel.articleForArticleFragment = it
+            vm.articleForArticleFragment = it
             findNavController().navigate(R.id.action_breakingNewsFragment_to_articleFragment)
         }
+        // Prepopulate rv, if there are articles in viewModel
+        newsAdapter.differ.submitList(vm.breakingNewsResponse?.articles)
 
-        newsAdapter.differ.submitList(viewModel.breakingNewsResponse?.articles)
-        //if (viewModel.breakingNewsResponse == null) viewModel.getBreakingNews("us")
-
-        viewModel.breakingNews.observe(viewLifecycleOwner, Observer { response ->
+        vm.breakingNews.observe(viewLifecycleOwner, Observer { response ->
             when (response) {
                 is Resource.Success -> {
                     hideProgressBar()
                     response.data?.let { newsResponse ->
                         newsAdapter.differ.submitList(newsResponse.articles.toList())
-                        val rangeStart = (viewModel.breakingNewsPage - 2) * QUERY_PAGE_SIZE
+                        val rangeStart = (vm.breakingNewsPage - 2) * QUERY_PAGE_SIZE
                         val itemCount = newsResponse.articles.size - rangeStart
                         newsAdapter.notifyItemRangeInserted(rangeStart, itemCount)
-                        viewModel.totalResults = newsResponse.totalResults
+                        vm.totalResults = newsResponse.totalResults
                     }
                 }
                 is Resource.Error -> {
@@ -88,6 +78,51 @@ class BreakingNewsFragment : Fragment() {
         })
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        vm.breakingNews = MutableLiveData()
+    }
+
+    private val scrollListener = object : RecyclerView.OnScrollListener() {
+        override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+            super.onScrollStateChanged(recyclerView, newState)
+            // Preparations to know should paginate or not
+            val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+            val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
+            val totalItemCountInAdapter = layoutManager.itemCount
+
+            val isAtLastItem = (lastVisibleItemPosition + 1) >= totalItemCountInAdapter
+            val isTotalMoreThanVisible = vm.totalResults ?: 0 > totalItemCountInAdapter
+            // Three conditions, when should paginate
+            val shouldPaginate = isAtLastItem && isTotalMoreThanVisible && !isLoading
+
+            if (shouldPaginate) {
+                vm.getBreakingNews("us") // With already increased page in vm
+            }
+
+            // If connection appear, all we need for refreshing page is to swipe screen
+            if (vm.breakingNewsResponse == null
+                && !vm.previousInternetStateBreakingNews
+                && vm.hasInternetConnection()
+            ) {
+                vm.getBreakingNews("us") // Call only if internet is ok
+            }
+            else
+                if (vm.breakingNewsResponse == null && !vm.hasInternetConnection()) {
+                    vm.breakingNews.postValue(Resource.Error("no internet connection"))
+                }
+
+            if (vm.isTooManyRequests)
+                vm.breakingNews.postValue(Resource.Error("too many requests"))
+        }
+
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            super.onScrolled(recyclerView, dx, dy) // Can't put above's code here, cuz onScrolled
+            // is only called when visible ViewHolders are moved. If we have not ViewHolders at
+            // all, we can't use this method
+        }
+    }
+
     private fun hideProgressBar() {
         binding.paginationProgressBar.visibility = View.INVISIBLE
         isLoading = false
@@ -98,68 +133,22 @@ class BreakingNewsFragment : Fragment() {
         isLoading = true
     }
 
-    private val scrollListener = object : RecyclerView.OnScrollListener() {
-        override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-            super.onScrollStateChanged(recyclerView, newState)
-
-            val layoutManager = recyclerView.layoutManager as LinearLayoutManager
-            val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
-            val totalItemCountInAdapter = layoutManager.itemCount
-
-            val isAtLastItem = (lastVisibleItemPosition + 1) >= totalItemCountInAdapter
-            val isTotalMoreThanVisible = viewModel.totalResults ?: 0 > totalItemCountInAdapter
-
-            val shouldPaginate = isAtLastItem && isTotalMoreThanVisible && !isLoading
-
-            if (shouldPaginate) {
-                viewModel.getBreakingNews("us")
-            }
-
-            // If connection appear, all we need to refresh page is to swipe screen
-            if (viewModel.breakingNewsResponse == null
-                && !viewModel.previousInternetStateBreakingNews
-                && viewModel.hasInternetConnection()
-            ) {
-                viewModel.getBreakingNews("us")
-            }
-            when (viewModel.breakingNewsResponse) {
-                null -> if (!viewModel.hasInternetConnection())
-                    viewModel.breakingNews.postValue(Resource.Error("no internet connection"))
-                else -> if (!viewModel.hasInternetConnection() && isAtLastItem)
-                    viewModel.breakingNews.postValue(Resource.Error("no internet connection"))
-            }
-
-            if (viewModel.isTooManyRequests)
-                viewModel.breakingNews.postValue(Resource.Error("too many requests"))
-
-        }
-
-        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-            super.onScrolled(recyclerView, dx, dy)
-        }
-    }
-
     private fun setupRecyclerView() {
         newsAdapter = NewsAdapter()
         binding.rvBreakingNews.apply {
             adapter = newsAdapter
             layoutManager = LinearLayoutManager(activity)
             addOnScrollListener(this@BreakingNewsFragment.scrollListener)
-            setHasFixedSize(true)
+            setHasFixedSize(true) // Accelerate work of rv
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        if (this::viewModel.isInitialized) viewModel.breakingNews = MutableLiveData()
-    }
-
-    fun showSafeToast(view: View, text: String) {
-        if (Calendar.getInstance().timeInMillis >= viewModel.toastShowTime + 4000L) {
+    private fun showSafeToast(view: View, text: String) { // Prevent appearance of multiply toasts at once
+        if (Calendar.getInstance().timeInMillis >= vm.toastShowTime + 4000L) {
             val snackbar = Snackbar.make(view, "Error: $text", Snackbar.LENGTH_LONG)
             snackbar.view.background = resources.getDrawable(R.drawable.snackbar_background)
             snackbar.show()
-            viewModel.toastShowTime = Calendar.getInstance().timeInMillis
+            vm.toastShowTime = Calendar.getInstance().timeInMillis
         }
     }
 }

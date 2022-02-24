@@ -38,9 +38,9 @@ class SearchNewsFragment : Fragment() {
     lateinit var viewModel: NewsViewModel
     lateinit var newsAdapter: NewsAdapter
 
-    var isLoading = false
+    var isLoading = false // Check if loading now
 
-    var job: Job? = null
+    var job: Job? = null // Background search job
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreateView(
@@ -55,31 +55,35 @@ class SearchNewsFragment : Fragment() {
     @SuppressLint("NotifyDataSetChanged", "ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         viewModel = (activity as NewsActivity).viewModel
 
         setupRecyclerView()
 
         binding.etSearch.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) hideKeyboard()
+            if (!hasFocus) hideKeyboard() // Remove keyboard when touch out of editText field
         }
 
         newsAdapter.setOnItemClickListener {
-            viewModel.articleForArticleFragment = it
+            viewModel.articleForArticleFragment = it // Save article to show in ArticleFragment
             findNavController().navigate(R.id.action_searchNewsFragment_to_articleFragment)
         }
-
+        // If the query was previously, recover this query
         binding.etSearch.setText(viewModel.lastSearchQuery)
         newsAdapter.differ.submitList(viewModel.searchNewsResponse?.articles)
 
         binding.etSearch.addTextChangedListener { editable ->
-            job?.cancel()
-            if (viewModel.previousOrientation == viewModel.currentOrientation
-                && viewModel.previousMode == viewModel.currentMode) {
+            job?.cancel() // Cancel previous job if new char is entered
+            if (viewModel.previousOrientation == viewModel.currentOrientation // Prevent firing change
+                && viewModel.previousMode == viewModel.currentMode // listener in these two cases
+            ) {
                 job = MainScope().launch {
-                    delay(SEARCH_NEWS_TIME_DELAY)
+                    delay(SEARCH_NEWS_TIME_DELAY) // Search starts after some delay
                     editable?.let {
-                        viewModel.searchNewsPage = 1
-                        viewModel.searchNewsResponse = null
+                        if (editable.toString() != viewModel.lastSearchQuery) {
+                            viewModel.searchNewsPage = 1 // Drawback the original values of page and
+                            viewModel.searchNewsResponse = null // response
+                        }
                         if (editable.toString()
                                 .isNotEmpty() && editable.toString() != viewModel.lastSearchQuery
                         ) {
@@ -127,7 +131,8 @@ class SearchNewsFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        viewModel.searchNews = MutableLiveData()
+        viewModel.searchNews =
+            MutableLiveData() // Reset to prevent firing of old value when fragment created
         job?.cancel()
     }
 
@@ -146,7 +151,21 @@ class SearchNewsFragment : Fragment() {
         @SuppressLint("ClickableViewAccessibility")
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             super.onScrollStateChanged(recyclerView, newState)
+            // Preparations to know should paginate or not
+            val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+            val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
+            val totalItemCountInAdapter = layoutManager.itemCount
 
+            val isAtLastItem = (lastVisibleItemPosition + 1) >= totalItemCountInAdapter
+            val isTotalMoreThanVisible = viewModel.totalResults ?: 0 > totalItemCountInAdapter
+            // Three conditions, when should paginate
+            val shouldPaginate = isAtLastItem && isTotalMoreThanVisible && !isLoading
+
+            if (shouldPaginate) {
+                viewModel.searchNews(binding.etSearch.text.toString())
+            }
+
+            // If connection appear, all we need for refreshing page is to swipe screen
             if (viewModel.searchNewsResponse == null
                 && !viewModel.previousInternetStateSearchNews
                 && viewModel.hasInternetConnection()
@@ -154,25 +173,11 @@ class SearchNewsFragment : Fragment() {
                 viewModel.searchNews(binding.etSearch.text.toString())
             }
 
-            binding.etSearch.clearFocus()
+            binding.etSearch.clearFocus() // To remove keyboard
         }
 
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
-            if (dy != 0) {
-                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
-                val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
-                val totalItemCountInAdapter = layoutManager.itemCount
-
-                val isAtLastItem = (lastVisibleItemPosition + 1) >= totalItemCountInAdapter
-                val isTotalMoreThanVisible = viewModel.totalResults ?: 0 > totalItemCountInAdapter
-
-                val shouldPaginate = isAtLastItem && isTotalMoreThanVisible && !isLoading
-
-                if (shouldPaginate) {
-                    viewModel.searchNews(binding.etSearch.text.toString())
-                }
-            }
         }
     }
 
@@ -186,7 +191,7 @@ class SearchNewsFragment : Fragment() {
         }
     }
 
-    fun showSafeToast(view: View, text: String) {
+    private fun showSafeToast(view: View, text: String) {
         if (Calendar.getInstance().timeInMillis >= viewModel.toastShowTime + 4000L) {
             val snackbar = Snackbar.make(view, "Error: $text", Snackbar.LENGTH_LONG)
             snackbar.view.background = resources.getDrawable(R.drawable.snackbar_background)

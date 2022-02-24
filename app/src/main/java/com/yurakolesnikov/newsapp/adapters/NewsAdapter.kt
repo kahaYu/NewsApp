@@ -14,21 +14,22 @@ import com.yurakolesnikov.newsapp.utils.formatDate
 
 class NewsAdapter : RecyclerView.Adapter<NewsAdapter.ArticleViewHolder>() {
 
-    inner class ArticleViewHolder(itemView: View, _binding: ItemArticlePreviewBinding) :
+    // Pass binding object to have access to the views
+    inner class ArticleViewHolder(itemView: View, val binding: ItemArticlePreviewBinding) :
         RecyclerView.ViewHolder(itemView) {
-        val binding = _binding
     }
 
+    // Enhance work of RV, implement basic animation with help of DiffUtil
     private val differCallback = object : DiffUtil.ItemCallback<Article>() {
         override fun areItemsTheSame(oldItem: Article, newItem: Article): Boolean {
             return oldItem.url == newItem.url
         }
-
         override fun areContentsTheSame(oldItem: Article, newItem: Article): Boolean {
             return oldItem == newItem
         }
     }
 
+    // Compute the difference of two lists in the background
     val differ = AsyncListDiffer(this, differCallback)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ArticleViewHolder {
@@ -47,10 +48,10 @@ class NewsAdapter : RecyclerView.Adapter<NewsAdapter.ArticleViewHolder>() {
             tvSource?.text = article.source?.name
             tvTitle.text = article.title
             tvDescription?.text = article.description
-            tvPublishedAt.text = article.getFormattedPublishedAt()
+            tvPublishedAt.text = article.formattedPublishedAt // Change appearance of date
         }
         holder.itemView.setOnClickListener {
-            onItemClickListener?.let { it(article) }
+            onItemClickListener?.let { it(article) } // Make ViewHolder clickable
         }
     }
 
