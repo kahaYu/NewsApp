@@ -82,7 +82,7 @@ class SearchNewsFragment : Fragment() {
                     editable?.let {
                         if (editable.toString() != viewModel.lastSearchQuery) {
                             viewModel.searchNewsPage = 1 // Drawback the original values of page and
-                            viewModel.searchNewsResponse = null // response
+                            viewModel.searchNewsResponse = null // response.
                         }
                         if (editable.toString()
                                 .isNotEmpty() && editable.toString() != viewModel.lastSearchQuery
